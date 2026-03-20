@@ -1,0 +1,42 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme static {
+  --font-sans: 'Public Sans', sans-serif;
+}
+
+/* ─── Global design tokens ───────────────────────────────────────────────── */
+:root {
+  --bg:       #ffffff;
+  --bg-alt:   #f5f7fb;
+  --surface:  #ffffff;
+  --border:   #e2e8f0;
+  --text:     #0f1f45;
+  --muted:    #64748b;
+  --subtle:   #94a3b8;
+  --red:      #e8372a;
+  --red-hover:#ff4438;
+  --navy:     #1e3a6e;
+  --page-bg:  #ffffff;
+}
+
+html.dark {
+  --bg:       #0f1117;
+  --bg-alt:   #12161f;
+  --surface:  #161b27;
+  --border:   rgba(255, 255, 255, 0.08);
+  --text:     #e8f0ff;
+  --muted:    #94a3b8;
+  --subtle:   #4b5563;
+  --page-bg:  #0f1117;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  transition: background 300ms ease, color 300ms ease;
+}
