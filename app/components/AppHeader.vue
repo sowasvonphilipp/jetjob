@@ -126,7 +126,7 @@
             class="admin-link icon-btn"
             title="Admin Panel"
           >
-            <CogIcon class="icon" />
+            <ShieldCheckIcon class="icon" />
           </NuxtLink>
         </ClientOnly>
 
@@ -291,7 +291,8 @@ import {
   BriefcaseIcon,
   ClipboardDocumentListIcon,
   UserIcon,
-  CogIcon,
+  Cog8ToothIcon,
+  ShieldCheckIcon,
   Bars3Icon,
   XMarkIcon,
   MagnifyingGlassIcon,
@@ -338,7 +339,7 @@ const navLinks = [
     icon: ClipboardDocumentListIcon
   },
   { to: '/profile', label: 'Profile', icon: UserIcon },
-  { to: '/settings', label: 'Settings', icon: CogIcon }
+  { to: '/settings', label: 'Settings', icon: Cog8ToothIcon }
 ]
 
 async function handleSignOut() {
@@ -666,6 +667,7 @@ onMounted(async () => {
     width 240ms ease,
     border-color 160ms ease,
     box-shadow 160ms ease;
+  appearance: none;
   -webkit-appearance: none;
 }
 .search-input::placeholder {

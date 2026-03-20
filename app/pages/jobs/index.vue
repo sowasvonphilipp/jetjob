@@ -16,7 +16,7 @@
             to="/admin"
             class="btn btn-outline btn-sm"
           >
-            <CogIcon
+            <ShieldCheckIcon
               class="btn-icon"
               aria-hidden="true"
             />
@@ -165,7 +165,7 @@ import {
   MapPinIcon,
   BriefcaseIcon,
   MagnifyingGlassIcon,
-  CogIcon
+  ShieldCheckIcon
 } from '@heroicons/vue/24/outline'
 
 const supabase = useSupabase()
@@ -463,6 +463,7 @@ useSeoMeta({
   line-height: 1.6;
   margin: 0;
   display: -webkit-box;
+  line-clamp: 2;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;

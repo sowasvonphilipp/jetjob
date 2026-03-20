@@ -80,6 +80,17 @@
         </div>
 
         <div
+          v-else-if="jobPosts.length === 0"
+          class="empty-jobs"
+        >
+          <div class="empty-icon-wrap">
+            <UserGroupIcon class="empty-icon" />
+          </div>
+          <h3>No openings right now</h3>
+          <p>We aren't currently hiring for any positions. Keep an eye on our announcements for the next wave!</p>
+        </div>
+
+        <div
           v-else
           class="cards-grid"
         >
@@ -253,23 +264,35 @@ function formatDate(date) {
 }
 
 onMounted(async () => {
-  const { data } = await supabase
-    .from('jobs')
-    .select('*')
-    .eq('is_active', true)
-    .order('posted_at', { ascending: false })
-    .limit(4)
-  if (data) jobPosts.value = data
-  loadingJobs.value = false
+  if (import.meta.client) {
+    loading.value = true
+    try {
+      const { data, error } = await supabase
+        .from('jobs')
+        .select('*')
+        .eq('is_active', true)
+        .order('created_at', { ascending: false }) // Changed from posted_at
+        .limit(6) // Changed from 4
+      
+      if (error) throw error
+      if (data) jobPosts.value = data
 
-  const { data: annData } = await supabase
-    .from('announcements')
-    .select('*')
-    .eq('is_active', true)
-    .order('created_at', { ascending: false })
-  if (annData) activeAnnouncements.value = annData
+      // Also get announcements
+      const { data: annData, error: annError } = await supabase
+        .from('announcements')
+        .select('*')
+        .order('created_at', { ascending: false })
+        .limit(3) // New limit
+      
+      if (annError) throw annError
+      if (annData) announcements.value = annData // Changed from activeAnnouncements
+    } catch (e) {
+      console.error('Failed to load landing data:', e)
+    } finally {
+      loading.value = false
+    }
+  }
 })
-
 const perks = [
   {
     icon: StarIcon,
@@ -426,6 +449,31 @@ useSeoMeta({
   gap: 12px;
   flex-wrap: wrap;
 }
+
+/* ─── Empty States ────────────────────────────────────────────────────────── */
+.empty-jobs {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 60px 24px;
+  text-align: center;
+  max-width: 500px;
+  margin: 40px auto;
+}
+.empty-icon-wrap {
+  width: 64px;
+  height: 64px;
+  background: rgba(232, 55, 42, 0.1);
+  color: var(--red);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+}
+.empty-icon { width: 32px; height: 32px; }
+.empty-jobs h3 { font-size: 1.25rem; font-weight: 800; color: var(--text); margin-bottom: 8px; }
+.empty-jobs p { font-size: 0.95rem; color: var(--muted); line-height: 1.5; }
 
 /* ─── Job cards ──────────────────────────────────────────────────────────── */
 .cards-grid {
