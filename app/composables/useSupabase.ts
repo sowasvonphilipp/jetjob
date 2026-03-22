@@ -64,13 +64,13 @@ export function useAuth() {
   }
 
   async function signInWithDiscord() {
-    const { error } = await supabase.auth.signInWithOAuth({
+    const response = await supabase.auth.signInWithOAuth({
       provider: 'discord',
       options: {
         redirectTo: `${window.location.origin}/auth/callback`
       }
     })
-    if (error) throw error
+    if (response?.error) throw response.error
   }
 
   async function signOut() {

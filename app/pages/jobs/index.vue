@@ -101,6 +101,9 @@
                 aria-hidden="true"
               />
             </div>
+            <div v-if="job.is_featured" class="featured-badge">
+              <StarIcon class="star-icon" /> Featured
+            </div>
           </div>
 
           <!-- Body -->
@@ -165,8 +168,9 @@ import {
   MapPinIcon,
   BriefcaseIcon,
   MagnifyingGlassIcon,
-  ShieldCheckIcon
-} from '@heroicons/vue/24/outline'
+  ShieldCheckIcon,
+  StarIcon
+} from '@heroicons/vue/24/solid'
 
 const supabase = useSupabase()
 const { isAdmin } = useAuth()
@@ -211,6 +215,7 @@ async function fetchJobs() {
     .from('jobs')
     .select('*')
     .eq('is_active', true)
+    .order('is_featured', { ascending: false })
     .order('posted_at', { ascending: false })
   if (data) jobs.value = data
   if (error) console.error('Error fetching jobs:', error)
@@ -449,6 +454,16 @@ useSeoMeta({
   border-radius: 99px;
   align-self: flex-start;
 }
+.featured-badge {
+  position: absolute; top: 10px; right: 10px;
+  background: #fdf2f2; color: #b91c1c; 
+  padding: 4px 10px; border-radius: 99px;
+  font-size: 0.65rem; font-weight: 800; border: 1px solid #fecaca;
+  display: flex; align-items: center; gap: 4px; z-index: 10;
+  text-transform: uppercase; letter-spacing: 0.05em;
+}
+.star-icon { width: 12px; height: 12px; }
+.card-banner { position: relative; }
 .card-title {
   font-size: 1rem;
   font-weight: 800;

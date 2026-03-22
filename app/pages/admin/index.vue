@@ -2,9 +2,8 @@
   <main class="page">
     <div class="container">
       <ClientOnly>
-        <!-- Access denied -->
         <div
-          v-if="!isAdmin && !loading"
+          v-if="!isAdmin"
           class="empty-state"
         >
           <ShieldExclamationIcon
@@ -36,6 +35,10 @@
                 <h1 class="page-title">
                   Admin Panel
                 </h1>
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color: var(--muted); cursor:pointer; background: var(--surface); padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border);">
+                  <input type="checkbox" v-model="maskAsStaff" style="accent-color: var(--red);">
+                  Post actions as "Staff"
+                </label>
                 <Transition name="fade">
                   <span
                     v-if="savingItem"
@@ -159,18 +162,12 @@
                 v-if="permissions?.can_manage_jobs"
                 class="toolbar"
               >
-                <input
-                  v-model="newJobTitle"
-                  class="form-input"
-                  placeholder="New job title..."
-                >
-                <button
+                <NuxtLink
+                  to="/admin/jobs/create"
                   class="btn btn-primary"
-                  :disabled="!newJobTitle || savingItem"
-                  @click="createJob"
                 >
                   <PlusIcon class="btn-icon" /> Create Job
-                </button>
+                </NuxtLink>
               </div>
             </div>
 
@@ -681,7 +678,7 @@
                       {{ n.message }}
                     </td>
                     <td><span :class="['type-badge', `type-${n.type || n.category || 'system'}`]">{{ n.type || n.category || 'system' }}</span></td>
-                    <td><span class="author-tag">{{ n.sent_by_name || 'System' }}</span></td>
+                    <td><span class="author-tag">{{ n.actual_author ? `${n.actual_author} (as ${n.sent_by_name})` : (n.sent_by_name || 'System') }}</span></td>
                     <td>{{ formatDate(n.created_at) }}</td>
                   </tr>
                 </tbody>
@@ -1289,10 +1286,12 @@
         </template>
       </ClientOnly>
     </div>
+
   </main>
 </template>
 
 <script setup>
+definePageMeta({ layout: 'admin' })
 import { ref, computed, onMounted, watch } from 'vue'
 import {
   BriefcaseIcon,
@@ -1318,11 +1317,12 @@ import {
 const supabase = useSupabase()
 const { isAdmin, user, loading, fetchProfile, permissions } = useAuth()
 const refreshing = ref(false)
+const maskAsStaff = ref(true)
 
 const activeTab = ref('jobs')
 const allJobs = ref([])
 const loadingJobs = ref(true)
-const newJobTitle = ref('')
+
 
 const allApplications = ref([])
 const loadingApps = ref(true)
@@ -1518,21 +1518,7 @@ async function unbanSpecificUser(uid) {
   } finally { savingItem.value = false }
 }
 
-async function createJob() {
-  if (!newJobTitle.value) return
-  savingItem.value = true
-  try {
-    const { error } = await supabase.from('jobs').insert({ title: newJobTitle.value, created_by: user.value.id })
-    if (error) throw error
-    newJobTitle.value = ''
-    await fetchAllJobs()
-    showSaved()
-  } catch (error) {
-    alert(`Failed to create job: ${error.message}`)
-  } finally {
-    savingItem.value = false
-  }
-}
+
 
 async function toggleJobActive(job) {
   savingItem.value = true
@@ -1576,7 +1562,8 @@ async function updateApplicationStatus(app, newStatus) {
       application_id: app.id,
       event_type: 'status_change',
       description: `Status changed to ${newStatus}`,
-      author_name: adminDisplayName.value
+      author_name: maskAsStaff.value ? 'Staff' : adminDisplayName.value,
+      actual_author: adminDisplayName.value
     })
 
     // Dispatch cross-account notification directly to the applicant
@@ -1587,7 +1574,8 @@ async function updateApplicationStatus(app, newStatus) {
       message: `Your application for ${jobTitle} has been marked as ${newStatus}.`,
       type: 'status_update',
       category: 'status_update',
-      sent_by_name: adminDisplayName.value,
+      sent_by_name: maskAsStaff.value ? 'Staff' : adminDisplayName.value,
+      actual_author: adminDisplayName.value,
       link: `/applications/${app.id}`
     })
     showSaved()
@@ -1649,8 +1637,8 @@ async function unbanUser(userId) {
 async function postAnnouncement() {
   savingItem.value = true
   try {
-    const authorName = user.value?.user_metadata?.full_name || user.value?.user_metadata?.name || 'Admin'
-    await supabase.from('announcements').insert({ title: newAnnouncement.value.title, content: newAnnouncement.value.content, created_by: user.value.id, author_name: authorName })
+    const finalAuthor = maskAsStaff.value ? 'Staff' : adminDisplayName.value
+    await supabase.from('announcements').insert({ title: newAnnouncement.value.title, content: newAnnouncement.value.content, created_by: user.value.id, author_name: finalAuthor })
     newAnnouncement.value = { title: '', content: '' }
     await fetchAnnouncements()
     showSaved()
@@ -1834,7 +1822,8 @@ async function postNotice() {
       target: isJobTarget ? 'job' : 'all',
       target_job_id: isJobTarget ? noticeForm.value.target : null,
       author_id: user.value.id,
-      author_name: adminDisplayName.value,
+      author_name: maskAsStaff.value ? 'Staff' : adminDisplayName.value,
+      actual_author: adminDisplayName.value,
       start_date: noticeForm.value.startDate || null,
       end_date: noticeForm.value.endDate || null
     })

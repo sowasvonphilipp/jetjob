@@ -187,24 +187,47 @@
         <!-- Auth button -->
         <ClientOnly>
           <template v-if="isLoggedIn">
-            <button
-              class="avatar-btn"
-              title="Sign out"
-              @click="handleSignOut"
-            >
-              <img
-                v-if="user?.user_metadata?.avatar_url"
-                :src="user.user_metadata.avatar_url"
-                alt="Your avatar"
-                class="user-avatar"
+            <div class="avatar-dropdown-wrapper">
+              <button
+                class="avatar-btn"
+                title="Account menu"
+                @click.stop="userMenuOpen = !userMenuOpen"
               >
-              <span
-                v-else
-                class="user-avatar-placeholder"
-              >
-                {{ (user?.user_metadata?.full_name || '?')[0] }}
-              </span>
-            </button>
+                <img
+                  v-if="user?.user_metadata?.avatar_url"
+                  :src="user.user_metadata.avatar_url"
+                  alt="Your avatar"
+                  class="user-avatar"
+                >
+                <span
+                  v-else
+                  class="user-avatar-placeholder"
+                >
+                  {{ (user?.user_metadata?.full_name || '?')[0] }}
+                </span>
+              </button>
+
+              <Transition name="dropdown">
+                <div v-if="userMenuOpen" class="avatar-dropdown-menu">
+                  <div class="dropdown-header">
+                    <span class="dropdown-name">{{ user?.user_metadata?.full_name || user?.user_metadata?.custom_claims?.global_name || 'User' }}</span>
+                  </div>
+                  <NuxtLink to="/profile" class="dropdown-item" @click="userMenuOpen = false">
+                    <component :is="UserIcon" class="dropdown-icon" /> Profile
+                  </NuxtLink>
+                  <NuxtLink to="/settings" class="dropdown-item" @click="userMenuOpen = false">
+                    <component :is="Cog8ToothIcon" class="dropdown-icon" /> Settings
+                  </NuxtLink>
+                  <NuxtLink to="/cv-generator" class="dropdown-item" @click="userMenuOpen = false">
+                    <component :is="ClipboardDocumentListIcon" class="dropdown-icon" /> CV Generator
+                  </NuxtLink>
+                  <div class="dropdown-divider"></div>
+                  <button class="dropdown-item logout-item" @click="handleSignOut">
+                    <component :is="ArrowRightOnRectangleIcon" class="dropdown-icon" /> Sign Out
+                  </button>
+                </div>
+              </Transition>
+            </div>
           </template>
           <NuxtLink
             v-else
@@ -282,7 +305,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   SunIcon,
@@ -298,7 +321,8 @@ import {
   MagnifyingGlassIcon,
   ArrowRightIcon,
   MegaphoneIcon,
-  BellIcon
+  BellIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/vue/24/outline'
 
 const { user, isLoggedIn, isAdmin, signOut } = useAuth()
@@ -313,6 +337,13 @@ const THEME_KEY = 'jetjob-theme'
 const isDark = ref(false)
 const toggling = ref(false)
 const mobileOpen = ref(false)
+const userMenuOpen = ref(false)
+
+function closeUserMenu(e) {
+  if (!e.target.closest('.avatar-dropdown-wrapper')) {
+    userMenuOpen.value = false
+  }
+}
 
 function updateDocumentClass(dark) {
   if (import.meta.client) document.documentElement.classList.toggle('dark', dark)
@@ -370,6 +401,7 @@ function dismissBanner() {
 // ── Mount ───────────────────────────────────────────────────────────────────
 onMounted(async () => {
   if (import.meta.client) {
+    document.addEventListener('click', closeUserMenu)
     if (localStorage.getItem(THEME_KEY) === 'dark') {
       isDark.value = true
       updateDocumentClass(true)
@@ -388,14 +420,27 @@ onMounted(async () => {
     }
   }
 
-  // Fetch Unread Notifications
-  if (isLoggedIn.value && user.value) {
-    const { count } = await supabase
-      .from('notifications')
-      .select('*', { count: 'exact', head: true })
-      .eq('user_id', user.value.id)
-      .eq('is_read', false)
-    if (count) unreadCount.value = count
+  async function fetchUnread() {
+    if (isLoggedIn.value && user.value) {
+      const { count } = await supabase
+        .from('notifications')
+        .select('*', { count: 'exact', head: true })
+        .eq('user_id', user.value.id)
+        .eq('is_read', false)
+      unreadCount.value = count || 0
+    }
+  }
+
+  fetchUnread()
+  if (import.meta.client) {
+    window.addEventListener('notifications:refresh', fetchUnread)
+  }
+})
+
+onBeforeUnmount(() => {
+  if (import.meta.client) {
+    document.removeEventListener('click', closeUserMenu)
+    window.removeEventListener('notifications:refresh', fetchUnread)
   }
 })
 </script>
@@ -958,6 +1003,102 @@ onMounted(async () => {
   justify-content: center;
   font-size: 0.75rem;
   font-weight: 700;
+}
+
+/* ─── Avatar Dropdown ────────────────────────────────────────────────────── */
+.avatar-dropdown-wrapper {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.avatar-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 12px);
+  right: 0;
+  width: 220px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0,0,0,0.4);
+  padding: 8px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.dark .avatar-dropdown-menu {
+  background: #18181b;
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.dropdown-header {
+  padding: 10px 12px;
+  margin-bottom: 4px;
+}
+
+.dropdown-name {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--text);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+
+.dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  padding: 10px 12px;
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--muted);
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  text-decoration: none;
+  cursor: pointer;
+  text-align: left;
+  transition: all 150ms ease;
+}
+
+.dropdown-item:hover {
+  background: rgba(255,255,255,0.08);
+  color: var(--hover);
+}
+
+.dropdown-icon {
+  width: 16px;
+  height: 16px;
+  color: inherit;
+  opacity: 0.8;
+}
+
+.dropdown-divider {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 6px;
+}
+
+.logout-item {
+  color: var(--red);
+}
+.logout-item:hover {
+  background: rgba(239, 68, 68, 0.1);
+  color: var(--red-hover);
+}
+
+.dropdown-enter-active,
+.dropdown-leave-active {
+  transition: opacity 150ms ease, transform 150ms ease;
+}
+.dropdown-enter-from,
+.dropdown-leave-to {
+  opacity: 0;
+  transform: translateY(-8px);
 }
 
 .login-btn {

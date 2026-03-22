@@ -76,8 +76,7 @@ async function handleLogin() {
   isLoading.value = true
   errorMsg.value = ''
   try {
-    const { error } = await signInWithDiscord()
-    if (error) throw error
+    await signInWithDiscord()
   } catch (e) {
     console.error('Login error:', e)
     errorMsg.value = e.message || 'Failed to connect to Discord'

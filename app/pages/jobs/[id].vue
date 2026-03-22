@@ -63,6 +63,42 @@
               class="detail-body"
               v-html="formattedDescription"
             />
+
+            <div v-if="formattedRequirements" style="margin-top: 32px;">
+              <h2 class="section-heading">Description</h2>
+              <div
+                class="detail-body"
+                v-html="formattedRequirements"
+              />
+            </div>
+
+            <!-- New Requirements Grid -->
+            <div class="req-badges-grid">
+               <div v-if="job.min_age" class="req-badge">
+                 <span class="rb-label">Min Age</span>
+                 <span class="rb-value">{{ job.min_age }}+</span>
+               </div>
+               <div v-if="job.flight_hours_required" class="req-badge">
+                 <span class="rb-label">Flight Hours</span>
+                 <span class="rb-value">{{ job.flight_hours_required }}h</span>
+               </div>
+               <div v-if="job.atc_hours_required" class="req-badge">
+                 <span class="rb-label">ATC Hours</span>
+                 <span class="rb-value">{{ job.atc_hours_required }}h</span>
+               </div>
+               <div v-if="job.base_hub" class="req-badge">
+                 <span class="rb-label">Base Hub</span>
+                 <span class="rb-value">{{ job.base_hub }}</span>
+               </div>
+               <div class="req-badge">
+                 <span class="rb-label">Discord</span>
+                 <span class="rb-value">{{ job.discord_required ? 'Req' : 'No' }}</span>
+               </div>
+               <div class="req-badge">
+                 <span class="rb-label">VATSIM</span>
+                 <span class="rb-value">{{ job.flying_vatsim_required ? 'Req' : 'No' }}</span>
+               </div>
+            </div>
           </div>
 
           <!-- Sidebar -->
@@ -132,16 +168,21 @@
                 </div>
               </div>
 
-              <div class="sidebar-row">
-                <ClipboardDocumentCheckIcon
+              <div
+                v-if="job.start_date"
+                class="sidebar-row"
+              >
+                <CalendarIcon
                   class="sidebar-icon"
                   aria-hidden="true"
                 />
                 <div>
-                  <span class="sidebar-label">Requirements</span>
-                  <span class="sidebar-value">{{ job.requirements }} requirement{{ job.requirements !== 1 ? 's' : '' }}</span>
+                  <span class="sidebar-label">Expected Start</span>
+                  <span class="sidebar-value">{{ job.start_date }}</span>
                 </div>
               </div>
+
+
 
               <!-- Status messages -->
               <div
@@ -182,17 +223,18 @@
                 Applications closed
               </div>
 
-              <!-- Already applied -->
               <div
                 v-else-if="hasApplied"
-                class="applied-badge"
+                class="applied-badge-container"
               >
-                <CheckCircleIcon
-                  class="status-icon"
-                  aria-hidden="true"
-                />
-                You've already applied
-                <span class="applied-status">Status: {{ existingApplication?.status }}</span>
+                <div class="applied-badge">
+                  <CheckCircleIcon class="status-icon" aria-hidden="true" />
+                  Your Application is Pending
+                </div>
+                <p class="success-note">
+                  {{ job.custom_success_message || 'Our team will review your application soon.' }}
+                </p>
+                <span class="status-pill">{{ existingApplication?.status }}</span>
               </div>
 
               <!-- Apply button (opens form) -->
@@ -312,21 +354,28 @@
             </div>
 
             <!-- Submit -->
-            <div class="apply-form-actions">
-              <button
-                class="btn btn-outline"
-                @click="showApplyForm = false"
-              >
-                Cancel
-              </button>
-              <button
-                class="btn btn-primary"
-                :disabled="applying || !canSubmit"
-                @click="applyForJob"
-              >
-                <span v-if="!applying">Submit Application</span>
-                <span v-else>Submitting…</span>
-              </button>
+            <div class="apply-form-actions" style="display:flex; flex-direction:column; gap:16px; margin-top:24px;">
+              <label class="q-checkbox" style="display:flex; gap:10px; align-items:flex-start; cursor:pointer;" v-if="job.requirements">
+                <input v-model="requirementsMet" type="checkbox" style="width:18px;height:18px;margin-top:2px;accent-color:var(--red);" />
+                <span style="font-size: 0.9rem; font-weight: 600; color:var(--text); line-height:1.4;">I confirm that I meet all of the stated role requirements and understand that submitting false information may result in a blacklist.</span>
+              </label>
+
+              <div style="display:flex; align-items:center; justify-content:flex-end; gap:12px; border-top:1px solid var(--border); padding-top:20px;">
+                <button
+                  class="btn btn-outline"
+                  @click="showApplyForm = false"
+                >
+                  Cancel
+                </button>
+                <button
+                  class="btn btn-primary"
+                  :disabled="applying || !canSubmit || (!!job.requirements && !requirementsMet)"
+                  @click="applyForJob"
+                >
+                  <span v-if="!applying">Submit Application</span>
+                  <span v-else>Submitting…</span>
+                </button>
+              </div>
             </div>
 
             <p
@@ -370,6 +419,7 @@ const bannedReason = ref(null)
 const questions = ref([])
 const answers = ref({})
 const showApplyForm = ref(false)
+const requirementsMet = ref(false)
 
 const hasApplied = computed(() => !!existingApplication.value)
 const isFull = computed(() => job.value?.applicant_limit && job.value.applicant_count >= job.value.applicant_limit)
@@ -389,6 +439,14 @@ const canSubmit = computed(() => {
 const formattedDescription = computed(() => {
   if (!job.value?.long_description) return ''
   return job.value.long_description
+    .split('\n')
+    .map(p => p.trim() ? `<p>${p}</p>` : '')
+    .join('')
+})
+
+const formattedRequirements = computed(() => {
+  if (!job.value?.requirements || job.value.requirements === '0') return ''
+  return String(job.value.requirements)
     .split('\n')
     .map(p => p.trim() ? `<p>${p}</p>` : '')
     .join('')
@@ -893,13 +951,19 @@ useSeoMeta({
   border-top: 1px solid var(--border);
 }
 
-.btn-outline {
-  background: transparent;
-  color: var(--muted);
-  border: 1px solid var(--border);
+.req-badges-grid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+  gap: 12px; margin-top: 32px;
 }
-.btn-outline:hover {
-  color: var(--text);
-  border-color: var(--muted);
+.req-badge {
+  background: var(--surface); border: 1px solid var(--border);
+  padding: 12px; border-radius: 10px; display: flex; flex-direction: column; gap: 4px;
 }
+.rb-label { font-size: 0.65rem; font-weight: 800; color: var(--subtle); text-transform: uppercase; }
+.rb-value { font-size: 0.95rem; font-weight: 800; color: var(--text); }
+
+.applied-badge-container { display: flex; flex-direction: column; gap: 12px; }
+.success-note { font-size: 0.82rem; color: var(--muted); line-height: 1.5; margin: 0; }
+.status-pill { background: rgba(232,55,42,0.1); color: var(--red); font-size: 0.75rem; font-weight: 800; padding: 4px 10px; border-radius: 99px; align-self: flex-start; text-transform: uppercase; }
+.section-heading { font-size: 1.1rem; font-weight: 900; color: var(--text); margin-bottom: 12px; }
 </style>

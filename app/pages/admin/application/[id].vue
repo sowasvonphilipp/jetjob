@@ -56,6 +56,10 @@
                 <p class="hero-sub">
                   Applying for <strong>{{ app.jobs?.title }}</strong>
                 </p>
+                <label style="display:flex; align-items:center; gap:8px; font-size:0.85rem; color: var(--muted); cursor:pointer; background: var(--surface); padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border); margin-top: 8px; width: fit-content;">
+                  <input type="checkbox" v-model="maskAsStaff" style="accent-color: var(--red);">
+                  Post actions as "Staff"
+                </label>
               </div>
             </div>
 
@@ -70,9 +74,6 @@
                   </option>
                   <option value="reviewing">
                     Reviewing
-                  </option>
-                  <option value="interview">
-                    Interview
                   </option>
                   <option value="accepted">
                     Accepted
@@ -254,7 +255,7 @@
                         v-if="event.author_name"
                         class="event-author"
                       >
-                        by {{ event.author_name }}
+                        by {{ event.actual_author ? `${event.actual_author} (as ${event.author_name})` : event.author_name }}
                       </p>
                     </template>
 
@@ -522,6 +523,7 @@
 </template>
 
 <script setup>
+definePageMeta({ layout: 'admin' })
 import { ref, computed, onMounted } from 'vue'
 import {
   ArrowLeftIcon,
@@ -543,6 +545,7 @@ function formatDate(date) {
 }
 
 const app = ref(null)
+const maskAsStaff = ref(true)
 const answers = ref([])
 const events = ref([])
 const loading = ref(true)
@@ -583,7 +586,8 @@ async function sendQuickNotification() {
       message: quickNotificationMsg.value,
       type: 'info',
       category: 'admin_broadcast',
-      sent_by_name: adminDisplayName.value
+      sent_by_name: maskAsStaff.value ? 'Staff' : adminDisplayName.value,
+      actual_author: adminDisplayName.value
     })
     quickNotificationMsg.value = ''
     notifSent.value = true
@@ -712,7 +716,8 @@ async function saveStatus() {
       message: `Your application for ${jobTitle} has been marked as ${status}.`,
       type: 'status_update',
       category: 'status_update',
-      sent_by_name: adminDisplayName.value,
+      sent_by_name: maskAsStaff.value ? 'Staff' : adminDisplayName.value,
+      actual_author: adminDisplayName.value,
       link: `/applications/${app.value.id}`
     })
     
@@ -764,7 +769,8 @@ async function addEvent(type, desc) {
       application_id: app.value.id,
       event_type: type,
       description: desc,
-      author_name: adminDisplayName.value
+      author_name: maskAsStaff.value ? 'Staff' : adminDisplayName.value,
+      actual_author: adminDisplayName.value
     }).select().single()
     if (error) throw error
     if (data) events.value.unshift(data)

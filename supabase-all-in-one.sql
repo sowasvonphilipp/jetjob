@@ -97,3 +97,52 @@ WHERE id IN (
 -- 8) ─── Applicant Feedback ──────────────────────────────────────────────────
 -- Adds a column to applications to store constructive feedback visible to applicants
 ALTER TABLE applications ADD COLUMN IF NOT EXISTS applicant_feedback TEXT;
+
+-- 9) ─── Staff Audit Log ─────────────────────────────────────────────────────
+-- Stores the actual real username of the staff executing an action for the admin panel audit log,
+-- allowing the public-facing author_name or sent_by_name to be completely anonymous (e.g. "Staff")
+ALTER TABLE notifications ADD COLUMN IF NOT EXISTS actual_author TEXT;
+ALTER TABLE application_events ADD COLUMN IF NOT EXISTS actual_author TEXT;
+
+-- Migration: Rich Text Job Requirements
+ALTER TABLE jobs ALTER COLUMN requirements TYPE TEXT USING requirements::TEXT;
+
+-- Announcements System
+CREATE TABLE IF NOT EXISTS announcements (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    title TEXT NOT NULL,
+    content TEXT NOT NULL,
+    created_by UUID REFERENCES auth.users,
+    author_name TEXT,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+ALTER TABLE profiles ADD COLUMN IF NOT EXISTS can_post_announcements BOOLEAN DEFAULT false;
+ALTER TABLE announcements ADD COLUMN IF NOT EXISTS actual_author TEXT;
+-- ==============================================================================
+-- ADD 20 NEW ADVANCED SETTINGS AND METADATA TO JOBS TABLE
+-- This seamlessly powers the new Fullpage Job Wizard and Application Dashboard
+-- ==============================================================================
+
+ALTER TABLE jobs 
+ADD COLUMN IF NOT EXISTS min_age INTEGER,
+ADD COLUMN IF NOT EXISTS max_age INTEGER,
+ADD COLUMN IF NOT EXISTS experience_level TEXT DEFAULT 'Entry Level',
+ADD COLUMN IF NOT EXISTS flight_hours_required INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS atc_hours_required INTEGER DEFAULT 0,
+ADD COLUMN IF NOT EXISTS training_required BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS discord_required BOOLEAN DEFAULT true,
+ADD COLUMN IF NOT EXISTS microphone_required BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS timezone_preference TEXT,
+ADD COLUMN IF NOT EXISTS language_requirements TEXT,
+ADD COLUMN IF NOT EXISTS aircraft_types TEXT,
+ADD COLUMN IF NOT EXISTS base_hub TEXT,
+ADD COLUMN IF NOT EXISTS benefits TEXT,
+ADD COLUMN IF NOT EXISTS application_difficulty TEXT DEFAULT 'Medium',
+ADD COLUMN IF NOT EXISTS interview_required BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS probation_period TEXT,
+ADD COLUMN IF NOT EXISTS supervisor_name TEXT,
+ADD COLUMN IF NOT EXISTS contact_email TEXT,
+ADD COLUMN IF NOT EXISTS is_featured BOOLEAN DEFAULT false,
+ADD COLUMN IF NOT EXISTS hide_applicant_count BOOLEAN DEFAULT false;

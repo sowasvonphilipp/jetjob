@@ -81,24 +81,7 @@
                 />
 
                 <!-- 2. REVIEWING -->
-                <div :class="['step', { active: app.status === 'reviewing', completed: ['interview', 'accepted', 'rejected'].includes(app.status) }]">
-                  <div class="step-dot">
-                    <CheckIcon
-                      v-if="['interview', 'accepted', 'rejected'].includes(app.status)"
-                      class="step-check"
-                    />
-                  </div>
-                  <div class="step-label">
-                    Reviewing
-                  </div>
-                </div>
-                <div
-                  class="step-line"
-                  :class="{ filled: ['interview', 'accepted', 'rejected'].includes(app.status) }"
-                />
-
-                <!-- 3. INTERVIEW -->
-                <div :class="['step', { active: app.status === 'interview', completed: ['accepted', 'rejected'].includes(app.status) }]">
+                <div :class="['step', { active: app.status === 'reviewing', completed: ['accepted', 'rejected'].includes(app.status) }]">
                   <div class="step-dot">
                     <CheckIcon
                       v-if="['accepted', 'rejected'].includes(app.status)"
@@ -106,7 +89,7 @@
                     />
                   </div>
                   <div class="step-label">
-                    Interview
+                    Reviewing
                   </div>
                 </div>
                 <div
@@ -191,20 +174,6 @@
           </div>
         </div>
 
-        <div
-          v-else-if="app.status === 'interview'"
-          class="result-card result-interview"
-        >
-          <h3 class="result-title">
-            <CalendarIcon class="result-icon" /> Interview Stage
-          </h3>
-          <p class="result-text">
-            Great news! Your application is moving to the <strong>Interview</strong> stage.
-          </p>
-          <p class="result-text">
-            Please keep an eye on your Discord DMs or email for an invitation to schedule an interview with human resources.
-          </p>
-        </div>
 
         <div class="content-grid">
           <!-- Left: Details & Answers -->
@@ -359,7 +328,6 @@ function getPublicDesc(event) {
   if (event.event_type === 'submitted') return 'We securely received your application and it is in queue for review.'
   if (event.event_type === 'status_change') {
     if (event.description.includes('reviewing')) return 'We are actively reviewing your application details.'
-    if (event.description.includes('interview')) return 'You have been selected for an interview! Keep an eye on your Discord or email.'
     if (event.description.includes('accepted')) return 'Congratulations! You have been accepted for the position.'
     if (event.description.includes('rejected')) return 'Unfortunately, we are moving forward with other candidates at this time.'
     return event.description

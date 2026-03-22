@@ -33,7 +33,7 @@
 
     <!-- ─── Announcements ────────────────────────────────────────────────────── -->
     <section
-      v-if="activeAnnouncements.length > 0"
+      v-if="announcements.length > 0"
       class="section section-announcements"
     >
       <div class="container">
@@ -45,7 +45,7 @@
         </h2>
         <div class="announcements-list">
           <div
-            v-for="ann in activeAnnouncements"
+            v-for="ann in announcements"
             :key="ann.id"
             class="announcement-card"
           >
@@ -71,9 +71,8 @@
           We only hire when we need — here's what's available right now.
         </p>
 
-        <!-- Loading -->
         <div
-          v-if="loadingJobs"
+          v-if="loading"
           class="loading-state"
         >
           <div class="spinner" />
@@ -252,8 +251,8 @@ import {
 
 const supabase = useSupabase()
 const jobPosts = ref([])
-const loadingJobs = ref(true)
-const activeAnnouncements = ref([])
+const loading = ref(true)
+const announcements = ref([])
 
 function formatDate(date) {
   return new Date(date).toLocaleDateString('en-GB', {

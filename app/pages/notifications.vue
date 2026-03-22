@@ -125,6 +125,7 @@ async function markAsRead(id) {
   await supabase.from('notifications').update({ is_read: true }).eq('id', id)
   const notif = notifications.value.find(n => n.id === id)
   if (notif) notif.is_read = true
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('notifications:refresh'))
 }
 
 async function markAllAsRead() {
@@ -133,6 +134,7 @@ async function markAllAsRead() {
 
   await supabase.from('notifications').update({ is_read: true }).in('id', unreadIds)
   notifications.value.forEach(n => n.is_read = true)
+  if (typeof window !== 'undefined') window.dispatchEvent(new CustomEvent('notifications:refresh'))
 }
 
 function formatDate(date) {
