@@ -264,6 +264,18 @@ function formatDate(date) {
 
 onMounted(async () => {
   if (import.meta.client) {
+    const route = useRoute()
+    const { isLoggedIn } = useAuth()
+
+    // Discord Activity Launch Detection
+    if (route.query.frame_id || document.referrer.includes('discord.com')) {
+      if (!isLoggedIn.value) {
+        return navigateTo('/discord')
+      } else {
+        return navigateTo('/jobs')
+      }
+    }
+
     loading.value = true
     try {
       const { data, error } = await supabase

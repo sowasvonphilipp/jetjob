@@ -1,6 +1,6 @@
 export default defineNuxtRouteMiddleware((to) => {
   // Auth Check
-  const publicRoutes = ['/', '/login', '/auth/callback']
+  const publicRoutes = ['/', '/login', '/auth/callback', '/discord', '/tos', '/datenschutz']
   if (publicRoutes.includes(to.path)) return
 
   const { isLoggedIn, loading } = useAuth()
