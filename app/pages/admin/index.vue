@@ -1500,7 +1500,7 @@ async function banSpecificUser(uid, username) {
   if (!confirm(`Are you sure you want to ban ${username}?`)) return
   savingItem.value = true
   try {
-    await supabase.from('banned_users').insert({ user_id: uid, reason: 'Banned by admin panel', admin_id: user.value.id })
+    await supabase.from('banned_users').insert({ user_id: uid, reason: 'Banned by admin panel', banned_by: user.value.id })
     await supabase.from('profiles').update({ role: 'user', staff_role: null }).eq('id', uid)
     await fetchAllAccounts()
     await fetchBans()
@@ -1738,13 +1738,16 @@ async function addStaff() {
       else { staffError.value = 'No user found with that Discord ID'; return }
     }
 
-    const { error } = await supabase.from('profiles').update({
+    const { data, error } = await supabase.from('profiles').update({
       role: 'admin',
       staff_role: staffForm.value.role
-    }).eq('id', uid)
+    }).eq('id', uid).select()
 
     if (error) {
       throw error
+    } else if (!data || data.length === 0) {
+      staffError.value = 'Update failed — no profile was modified. Please ensure the user exists and try again.'
+      return
     } else {
       staffAdded.value = true
       staffForm.value = { userId: '', role: 'admin' }
@@ -1767,7 +1770,7 @@ async function changeStaffRole(s, newRole) {
     savingItem.value = true
     try {
       await supabase.from('profiles').update({ role: 'user', staff_role: null, can_manage_jobs: false, can_manage_staff: false, can_manage_notices: false, can_post_announcements: false, can_send_notifications: false, can_ban_users: false }).eq('id', s.id)
-      await supabase.from('banned_users').insert({ user_id: s.id, reason: 'Banned from staff panel', admin_id: user.value.id })
+      await supabase.from('banned_users').insert({ user_id: s.id, reason: 'Banned from staff panel', banned_by: user.value.id })
       await fetchStaff()
       await fetchBans()
       if (allAccounts.value.length > 0) fetchAllAccounts()
@@ -1870,6 +1873,7 @@ function loadTab(tabName) {
   else if (tabName === 'announcements') fetchAnnouncements()
   else if (tabName === 'notifications') fetchSentNotifications()
   else if (tabName === 'staff') fetchStaff()
+  else if (tabName === 'accounts') fetchAllAccounts()
   else if (tabName === 'notices') fetchNotices()
   else if (tabName === 'blacklists') fetchBans()
 }
