@@ -2,14 +2,14 @@
   <main class="static-page">
     <div class="container">
       <h1 class="page-title">Application Tips</h1>
-      <p class="page-sub">How to stand out and succeed at Jet2 Virtual</p>
+      <p class="page-sub">How to stand out and succeed at Sunshine Studio</p>
       
       <div class="content-block">
         <h2>1. Be Genuine</h2>
-        <p>At Jet2 Virtual, we value authenticity. Do not use AI generators (like ChatGPT or Claude) to write your application answers or cover letter. Our system flags AI-generated responses automatically, and relying on them can result in an instant rejection. Write in your own unique voice!</p>
+        <p>At Sunshine Studio, we value authenticity. Do not use AI generators (like ChatGPT or Claude) to write your application answers or cover letter. Our system flags AI-generated responses automatically, and relying on them can result in an instant rejection. Write in your own unique voice!</p>
         
         <h2>2. Read the Requirements</h2>
-        <p>Before applying for any position—whether it's a First Officer or a Staff role—please carefully read the listed requirements. If a role requires a certain number of flight hours or specific simulator platforms, ensure you actually meet them before submitting. Lying about meeting requirements will result in a blacklist.</p>
+        <p>Before applying for any position—whether it's a technical or a staff role—please carefully read the listed requirements. If a role requires a certain level of experience or particular platform skills, ensure you meet them before submitting. Lying about meeting requirements will result in a blacklist.</p>
         
         <h2>3. Put Effort into Your Answers</h2>
         <p>Short, one-word answers usually won't cut it, especially for staff positions. Take the time to explain your thought process, showcase your experience, and prove why you are the best fit for the role.</p>
@@ -23,8 +23,8 @@
 
 <script setup>
 useSeoMeta({
-  title: 'Application Tips — Jet2 Jobs',
-  description: 'Learn how to submit a successful application at Jet2 Virtual.'
+  title: 'Application Tips — Sunshine Studio',
+  description: 'Learn how to submit a successful application at Sunshine Studio.'
 })
 </script>
 

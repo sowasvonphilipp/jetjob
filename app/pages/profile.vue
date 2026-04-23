@@ -1,535 +1,551 @@
 <template>
-  <main class="page">
-    <div class="container">
-      <h1 class="page-title">
-        My Profile
-      </h1>
-      <p class="page-sub">
-        Your Discord account details and portal activity.
-      </p>
+  <main class="page profile-page">
+    <!-- Header Banner -->
+    <div class="profile-header">
+      <div class="profile-banner">
+        <!-- Abstract gradient banner over the top -->
+        <div class="banner-bg"></div>
+        <div class="banner-blobs">
+          <div class="blob b1"></div>
+          <div class="blob b2"></div>
+        </div>
+      </div>
+      
+      <div class="container header-container">
+        <div class="header-avatar-wrap">
+          <img
+            :src="profile?.discord_avatar || 'https://cdn.discordapp.com/embed/avatars/0.png'"
+            class="header-avatar"
+            :class="{ 'pulse-glow': opts.avatarGlow }"
+            alt="User Avatar"
+          >
+          <div class="status-indicator" :class="{ 'pulse-indicator': opts.avatarGlow }"></div>
+        </div>
+        
+        <div class="header-info">
+          <h1 class="header-name">{{ profile?.full_name || profile?.discord_username || user?.email?.split('@')[0] || 'Loading...' }}</h1>
+          <div class="header-badges">
+            <span class="badge role-badge">{{ profile?.staff_role || profile?.role || 'User' }}</span>
+            <span class="badge date-badge">Member since {{ formatDate(profile?.created_at || user?.created_at) }}</span>
+          </div>
+          <p class="header-status" v-if="profile?.status_msg">{{ profile.status_msg }}</p>
+        </div>
+        
+        <div class="header-actions">
+           <NuxtLink to="/settings" class="btn btn-primary">Edit Settings</NuxtLink>
+        </div>
+      </div>
+    </div>
 
-      <!-- Loading -->
-      <div
-        v-if="loading"
-        class="loading-state"
-      >
-        <div class="spinner" />
+    <!-- Main Grid Content -->
+    <div class="container profile-grid">
+      <!-- Left Column: Identity Base -->
+      <div class="profile-col profile-left">
+        <div class="card glass-card fade-in">
+          <h2 class="card-title">Identity Base</h2>
+          <div class="identity-list">
+            <div class="id-item">
+              <span class="id-label">Discord ID</span>
+              <span class="id-value"><code>{{ profile?.discord_id || 'Hidden' }}</code></span>
+            </div>
+            <div class="id-item">
+              <span class="id-label">Roblox Username</span>
+              <span class="id-value">{{ profile?.roblox_username || 'Not Linked' }}</span>
+            </div>
+            <div class="id-item">
+              <span class="id-label">Location / Region</span>
+              <span class="id-value">{{ profile?.location || 'Not Set' }}</span>
+            </div>
+            <div class="id-item">
+              <span class="id-label">Pronouns</span>
+              <span class="id-value">{{ profile?.pronouns || 'Not Set' }}</span>
+            </div>
+            <div class="id-item" v-if="profile?.website">
+              <span class="id-label">Personal Website</span>
+              <span class="id-value"><a :href="profile.website" target="_blank" style="color:var(--red); text-decoration:none;">{{ profile.website.replace('https://','') }}</a></span>
+            </div>
+          </div>
+        </div>
+
+        <div class="card glass-card fade-in delay-1">
+          <h2 class="card-title">Biography</h2>
+          <p class="bio-text">{{ profile?.bio || 'No biography written yet. Tell us about yourself!' }}</p>
+        </div>
       </div>
 
-      <template v-else-if="user">
-        <!-- Profile card -->
-        <div class="profile-card">
-          <div class="profile-header">
-            <img
-              v-if="user.user_metadata?.avatar_url"
-              :src="user.user_metadata.avatar_url"
-              alt="Your avatar"
-              class="profile-avatar"
-            >
-            <div
-              v-else
-              class="profile-avatar-placeholder"
-            >
-              {{ (user.user_metadata?.full_name || '?')[0] }}
-            </div>
-
-            <div class="profile-info">
-              <h2 class="profile-name">
-                {{ user.user_metadata?.full_name || user.user_metadata?.name || 'User' }}
-              </h2>
-              <span class="profile-email">{{ user.email || 'No email' }}</span>
-              <span
-                v-if="profile?.role === 'admin'"
-                class="role-badge role-admin"
-              >
-                <ShieldCheckIcon
-                  class="role-icon"
-                  aria-hidden="true"
-                />
-                Admin
-              </span>
-              <span
-                v-else
-                class="role-badge role-user"
-              >
-                <UserIcon
-                  class="role-icon"
-                  aria-hidden="true"
-                />
-                Member
-              </span>
-            </div>
+      <!-- Right Column: Audit Log & Security -->
+      <div class="profile-col profile-right">
+        <div class="card glass-card fade-in delay-2">
+          <div class="card-title-row">
+             <h2 class="card-title">Personal Audit Log</h2>
+             <span class="badge security-badge">Confidential</span>
           </div>
-
-          <div class="profile-details">
-            <div class="detail-row">
-              <span class="detail-label">Roblox Username</span>
-              <div
-                v-if="editingRoblox"
-                class="roblox-edit"
-              >
-                <input
-                  v-model="editRobloxName"
-                  type="text"
-                  placeholder="Username"
-                  class="roblox-input"
-                  @keyup.enter="saveRobloxUsername"
-                >
-                <button
-                  class="btn-micro btn-primary"
-                  @click="saveRobloxUsername"
-                >
-                  Save
-                </button>
-                <button
-                  class="btn-micro btn-outline"
-                  @click="editingRoblox = false"
-                >
-                  Cancel
-                </button>
-              </div>
-              <div
-                v-else
-                class="roblox-display"
-                @click="startEditingRoblox"
-              >
-                <span
-                  class="detail-value"
-                  :class="{ 'text-muted': !profile?.roblox_username }"
-                >
-                  {{ profile?.roblox_username || 'Click to link account' }}
-                </span>
-                <PencilIcon
-                  class="edit-icon"
-                  aria-hidden="true"
-                />
+          <p class="card-sub">Recent security events and application actions.</p>
+          
+          <div class="audit-timeline">
+            <div class="timeline-item" v-for="log in auditLogs" :key="log.id">
+              <div class="timeline-dot" :class="`dot-${log.type}`"></div>
+              <div class="timeline-content">
+                <span class="timeline-date">{{ log.date }}</span>
+                <span class="timeline-event">{{ log.event }}</span>
+                <span class="timeline-detail">{{ log.detail }}</span>
               </div>
             </div>
-            <div class="detail-row">
-              <span class="detail-label">Discord ID</span>
-              <span class="detail-value">{{ profile?.discord_id || '—' }}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Member since</span>
-              <span class="detail-value">{{ profile?.created_at ? formatDate(profile.created_at) : '—' }}</span>
-            </div>
-            <div class="detail-row">
-              <span class="detail-label">Auth provider</span>
-              <span class="detail-value">Discord</span>
-            </div>
+            <div v-if="!auditLogs.length" style="color:var(--muted); font-size:0.85rem">No recent activity found.</div>
+          </div>
+          <div class="audit-footer">
+            <span>Powered by Sunshine Studio Security Engine</span>
           </div>
         </div>
-
-        <!-- Stats -->
-        <div class="stats-grid">
-          <div class="stat-card">
-            <ClipboardDocumentListIcon
-              class="stat-icon"
-              aria-hidden="true"
-            />
-            <div class="stat-value">
-              {{ applicationCount }}
-            </div>
-            <div class="stat-label">
-              Applications submitted
-            </div>
-          </div>
-          <div class="stat-card">
-            <CheckCircleIcon
-              class="stat-icon stat-icon-green"
-              aria-hidden="true"
-            />
-            <div class="stat-value">
-              {{ acceptedCount }}
-            </div>
-            <div class="stat-label">
-              Accepted
-            </div>
-          </div>
-          <div class="stat-card">
-            <ClockIcon
-              class="stat-icon stat-icon-amber"
-              aria-hidden="true"
-            />
-            <div class="stat-value">
-              {{ pendingCount }}
-            </div>
-            <div class="stat-label">
-              Pending
-            </div>
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="profile-actions">
-          <NuxtLink
-            to="/applications"
-            class="btn btn-outline"
-          >
-            <ClipboardDocumentListIcon
-              class="btn-icon"
-              aria-hidden="true"
-            />
-            View Applications
-          </NuxtLink>
-          <button
-            class="btn btn-danger"
-            @click="handleSignOut"
-          >
-            <ArrowRightStartOnRectangleIcon
-              class="btn-icon"
-              aria-hidden="true"
-            />
-            Sign Out
-          </button>
-        </div>
-      </template>
+      </div>
     </div>
   </main>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import {
-  UserIcon,
-  ShieldCheckIcon,
-  ClipboardDocumentListIcon,
-  CheckCircleIcon,
-  ClockIcon,
-  ArrowRightStartOnRectangleIcon,
-  PencilIcon
-} from '@heroicons/vue/24/outline'
+import { ref, reactive, onMounted } from 'vue'
 
+const { user, isLoggedIn } = useAuth()
 const supabase = useSupabase()
-const { user, profile, loading, signOut } = useAuth()
 
-const applicationCount = ref(0)
-const acceptedCount = ref(0)
-const pendingCount = ref(0)
+const profile = ref(null)
+const auditLogs = ref([])
 
-const editingRoblox = ref(false)
-const editRobloxName = ref('')
-
-function startEditingRoblox() {
-  editRobloxName.value = profile.value?.roblox_username || ''
-  editingRoblox.value = true
+function formatDate(ds) {
+  if (!ds) return 'Recently'
+  const d = new Date(ds)
+  if (isNaN(d)) return 'Recently'
+  return d.toLocaleDateString('en-US', { month: 'long', year: 'numeric' })
 }
 
-async function saveRobloxUsername() {
+async function fetchProfileData() {
   if (!user.value) return
-  const { error } = await supabase
-    .from('profiles')
-    .update({ roblox_username: editRobloxName.value.trim() })
-    .eq('id', user.value.id)
-
-  if (!error && profile.value) {
-    profile.value.roblox_username = editRobloxName.value.trim()
-  }
-  editingRoblox.value = false
+  const { data } = await supabase.from('profiles').select('*').eq('id', user.value.id).single()
+  if (data) Object.assign(profile.value = data)
 }
 
-function formatDate(date) {
-  return new Date(date).toLocaleDateString('en-GB', {
-    day: 'numeric',
-    month: 'long',
-    year: 'numeric'
-  })
-}
-
-async function handleSignOut() {
-  await signOut()
-}
-
-async function fetchStats() {
+async function fetchAuditLogs() {
   if (!user.value) return
-
-  const { data } = await supabase
-    .from('applications')
-    .select('status')
+  const { data } = await supabase.from('audit_logs')
+    .select('*')
     .eq('user_id', user.value.id)
-
+    .order('created_at', { ascending: false })
+    .limit(5)
   if (data) {
-    applicationCount.value = data.length
-    acceptedCount.value = data.filter(a => a.status === 'accepted').length
-    pendingCount.value = data.filter(a => a.status === 'pending').length
+    auditLogs.value = data.map(l => ({
+      id: l.id,
+      type: l.type,
+      date: formatDate(l.created_at),
+      event: l.event,
+      detail: l.detail
+    }))
   }
 }
 
-onMounted(fetchStats)
+const opts = reactive({ avatarGlow: true })
+const THEME_KEY = 'jetjob-complex-settings'
 
-// Re-fetch when user loads
-watch(user, (val) => {
-  if (val) fetchStats()
+function loadLocalSettings() {
+  const stored = localStorage.getItem(THEME_KEY)
+  if (stored) {
+    try {
+      const parsed = JSON.parse(stored)
+      Object.assign(opts, parsed)
+    } catch (e) {}
+  }
+}
+
+onMounted(async () => {
+  loadLocalSettings()
+  if (isLoggedIn.value) {
+    if (!profile.value) profile.value = {}
+    await Promise.all([fetchProfileData(), fetchAuditLogs()])
+  }
 })
 
 useSeoMeta({
-  title: 'My Profile — Jet2 Jobs',
-  description: 'View your profile and application stats.'
+  title: 'Profile — Sunshine Studio',
+  description: 'View your Sunshine Studio account dashboard and audit logs.'
 })
 </script>
 
 <style scoped>
-.page { min-height: 100vh; padding-bottom: 64px; }
-.container { max-width: 680px; margin: 0 auto; padding: 0 24px; }
+.page.profile-page {
+  min-height: 100vh;
+  background: var(--bg-alt, #0f1117);
+  padding-bottom: 80px;
+}
 
-.page-title {
-  font-size: 1.5rem;
+/* ━━━ Header Banner ━━━ */
+.profile-header {
+  position: relative;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 60px;
+}
+
+.profile-banner {
+  height: 220px;
+  position: relative;
+  overflow: hidden;
+  background: #1e222d; /* fallback */
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.banner-bg {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(135deg, rgba(232, 55, 42, 0.4) 0%, rgba(30, 58, 110, 0.8) 100%);
+  z-index: 1;
+  opacity: 0.8;
+}
+
+.banner-blobs .blob {
+  position: absolute;
+  filter: blur(80px);
+  border-radius: 50%;
+  opacity: 0.5;
+  z-index: 2;
+  animation: float 20s infinite alternate;
+}
+.blob.b1 { width: 400px; height: 400px; background: var(--red); top: -100px; left: 10%; }
+.blob.b2 { width: 500px; height: 500px; background: #3b82f6; bottom: -200px; right: 10%; animation-duration: 25s; animation-direction: reverse; }
+
+@keyframes float {
+  from { transform: translate(0, 0) scale(1); }
+  to { transform: translate(60px, 40px) scale(1.1); }
+}
+
+.header-container {
+  display: flex;
+  align-items: flex-end;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 30px;
+  position: relative;
+  top: -50px;
+  z-index: 10;
+}
+
+.header-avatar-wrap {
+  position: relative;
+  margin-right: 24px;
+}
+
+.header-avatar {
+  width: 130px;
+  height: 130px;
+  border-radius: 50%;
+  border: 6px solid var(--bg);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+  object-fit: cover;
+  background: #fff;
+  transition: transform 0.3s ease;
+}
+
+.pulse-glow {
+  animation: avatarPulse 3s infinite;
+  box-shadow: 0 0 0 0 rgba(232, 55, 42, 0.4);
+}
+
+@keyframes avatarPulse {
+  0% { box-shadow: 0 0 0 0 rgba(232, 55, 42, 0.7); }
+  70% { box-shadow: 0 0 0 15px rgba(232, 55, 42, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(232, 55, 42, 0); }
+}
+
+.status-indicator {
+  position: absolute;
+  bottom: 8px;
+  right: 8px;
+  width: 24px;
+  height: 24px;
+  background: #10b981;
+  border: 4px solid var(--bg);
+  border-radius: 50%;
+}
+
+.pulse-indicator {
+  animation: indicatorPulse 2s infinite;
+}
+
+@keyframes indicatorPulse {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.1); opacity: 1; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.header-info {
+  flex: 1;
+  padding-bottom: 8px; /* align with avatar base */
+}
+
+.header-name {
+  font-size: 2.2rem;
   font-weight: 900;
   color: var(--text);
-  margin: 48px 0 6px;
+  margin: 0 0 10px;
   letter-spacing: -0.02em;
-}
-.page-sub { font-size: 0.9rem; color: var(--muted); margin: 0 0 32px; }
-
-/* Profile card */
-.profile-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 14px;
-  overflow: hidden;
-  margin-bottom: 24px;
+  text-shadow: 0 2px 4px rgba(0,0,0,0.5);
 }
 
-.profile-header {
+.header-badges {
   display: flex;
+  gap: 12px;
   align-items: center;
-  gap: 20px;
-  padding: 28px 28px 20px;
+  flex-wrap: wrap;
 }
 
-.profile-avatar {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid var(--border);
-  flex-shrink: 0;
-}
-
-.profile-avatar-placeholder {
-  width: 72px;
-  height: 72px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, var(--red), #ff6b5b);
-  color: #fff;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.6rem;
-  font-weight: 800;
-  flex-shrink: 0;
-}
-
-.profile-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.profile-name {
-  font-size: 1.2rem;
-  font-weight: 800;
-  color: var(--text);
-  margin: 0;
-  letter-spacing: -0.01em;
-}
-
-.profile-email {
-  font-size: 0.82rem;
-  color: var(--muted);
+.badge {
+  padding: 4px 10px;
+  border-radius: 99px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
 }
 
 .role-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 0.7rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.04em;
-  padding: 3px 10px;
-  border-radius: 99px;
-  align-self: flex-start;
-  margin-top: 4px;
-}
-.role-icon { width: 12px; height: 12px; }
-.role-admin { background: rgba(232,55,42,0.1); color: var(--red); }
-.role-user { background: rgba(59,130,246,0.1); color: #3b82f6; }
-
-.profile-details {
-  border-top: 1px solid var(--border);
-  padding: 16px 28px 20px;
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 2px 10px rgba(232, 55, 42, 0.4);
 }
 
-.detail-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 0;
-}
-.detail-row + .detail-row {
-  border-top: 1px solid var(--border);
-}
-
-.detail-label {
-  font-size: 0.82rem;
-  font-weight: 600;
-  color: var(--muted);
-}
-.detail-value {
-  font-size: 0.85rem;
-  color: var(--text);
-  font-weight: 500;
-}
-
-/* Stats */
-.stats-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
-}
-
-.stat-card {
+.date-badge {
   background: var(--surface);
   border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px 16px;
-  text-align: center;
-  transition: border-color 160ms ease;
-}
-.stat-card:hover { border-color: rgba(232,55,42,0.3); }
-
-.stat-icon {
-  width: 24px;
-  height: 24px;
-  color: var(--red);
-  margin: 0 auto 8px;
-}
-.stat-icon-green { color: #22c55e; }
-.stat-icon-amber { color: #f59e0b; }
-
-.stat-value {
-  font-size: 1.5rem;
-  font-weight: 900;
-  color: var(--text);
-  letter-spacing: -0.02em;
-}
-.stat-label {
-  font-size: 0.72rem;
-  font-weight: 600;
-  color: var(--subtle);
-  text-transform: uppercase;
-  letter-spacing: 0.03em;
-  margin-top: 2px;
+  color: var(--muted);
 }
 
-/* Actions */
-.profile-actions {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
+.security-badge {
+  background: rgba(239, 68, 68, 0.1);
+  color: #ef4444;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.header-status {
+  margin: 12px 0 0;
+  font-size: 0.95rem;
+  color: var(--muted);
+  font-style: italic;
+}
+
+.header-actions {
+  padding-bottom: 12px;
 }
 
 .btn {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  padding: 10px 18px;
-  border-radius: 7px;
-  text-decoration: none;
+  justify-content: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 12px 24px;
+  border-radius: 8px;
   border: none;
   cursor: pointer;
-  transition: background 150ms ease, transform 130ms ease, box-shadow 150ms ease;
-  white-space: nowrap;
+  transition: all 0.2s ease;
+  text-decoration: none;
 }
-.btn-icon { width: 16px; height: 16px; }
-.btn-outline {
-  background: transparent;
-  color: var(--muted);
-  border: 1px solid var(--border);
+.btn-primary {
+  background: var(--red);
+  color: #fff;
+  box-shadow: 0 4px 14px rgba(232, 55, 42, 0.3);
 }
-.btn-outline:hover { color: var(--text); border-color: var(--muted); }
-.btn-danger {
-  background: rgba(239,68,68,0.1);
-  color: #ef4444;
-}
-.btn-danger:hover {
-  background: rgba(239,68,68,0.18);
+.btn-primary:hover {
+  background: #dc2626;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(232, 55, 42, 0.4);
 }
 
-/* Loading */
-.loading-state { text-align: center; padding: 80px 20px; }
-.spinner {
-  width: 32px; height: 32px;
-  border: 3px solid var(--border);
-  border-top-color: var(--red);
-  border-radius: 50%;
-  animation: spin 0.7s linear infinite;
+/* ━━━ Grid Content ━━━ */
+.profile-grid {
+  display: grid;
+  grid-template-columns: 1fr 1.2fr;
+  gap: 30px;
+  max-width: 1200px;
   margin: 0 auto;
-}
-@keyframes spin { to { transform: rotate(360deg); } }
-
-@media (max-width: 500px) {
-  .stats-grid { grid-template-columns: 1fr; }
-  .profile-header { flex-direction: column; text-align: center; }
-  .profile-info { align-items: center; }
-  .role-badge { align-self: center; }
-  .detail-row { flex-direction: column; align-items: flex-start; gap: 8px; }
+  align-items: start;
 }
 
-/* Roblox Edit */
-.roblox-display {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 6px;
-  margin: -4px -8px;
-  transition: background 150ms ease;
+/* Cards */
+.card {
+  padding: 30px;
+  border-radius: 16px;
+  margin-bottom: 30px;
 }
-.roblox-display:hover {
-  background: rgba(0,0,0,0.03);
-}
-.roblox-display .text-muted {
-  color: var(--subtle);
-  font-style: italic;
-}
-.edit-icon {
-  width: 14px;
-  height: 14px;
-  color: var(--muted);
-  opacity: 0;
-  transition: opacity 150ms ease;
-}
-.roblox-display:hover .edit-icon { opacity: 1; }
 
-.roblox-edit {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.roblox-input {
-  background: var(--bg);
+.glass-card {
+  background: rgba(var(--surface-rgb, 255, 255, 255), 0.03);
+  backdrop-filter: blur(10px);
   border: 1px solid var(--border);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+}
+
+.card-title {
+  font-size: 1.2rem;
+  font-weight: 900;
   color: var(--text);
-  font-size: 0.82rem;
-  padding: 4px 8px;
-  border-radius: 4px;
-  width: 140px;
-  outline: none;
+  margin: 0 0 20px;
+  letter-spacing: -0.01em;
 }
-.roblox-input:focus { border-color: var(--red); }
-.btn-micro {
+
+.card-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.card-title-row .card-title { margin: 0; }
+
+.card-sub {
+  font-size: 0.85rem;
+  color: var(--muted);
+  margin: 0 0 24px;
+}
+
+/* Identity List */
+.identity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.id-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+.id-item:last-child {
+  padding-bottom: 0;
+  border-bottom: none;
+}
+
+.id-label {
   font-size: 0.75rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--muted);
+  letter-spacing: 0.05em;
+}
+
+.id-value {
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: var(--text);
+}
+.id-value code {
+  background: rgba(255,255,255,0.05);
   padding: 4px 8px;
   border-radius: 4px;
-  cursor: pointer;
-  border: 1px solid transparent;
+  font-family: monospace;
+  font-size: 0.9rem;
 }
-.btn-micro.btn-primary { background: var(--red); color: white; }
-.btn-micro.btn-outline { background: transparent; border-color: var(--border); color: var(--text); }
+
+.bio-text {
+  font-size: 0.95rem;
+  line-height: 1.7;
+  color: var(--muted);
+  white-space: pre-wrap;
+  margin: 0;
+}
+
+/* ━━━ Audit Timeline ━━━ */
+.audit-timeline {
+  display: flex;
+  flex-direction: column;
+  position: relative;
+  padding-left: 20px;
+  margin-bottom: 24px;
+}
+.audit-timeline::before {
+  content: '';
+  position: absolute;
+  top: 6px;
+  bottom: 6px;
+  left: 5px;
+  width: 2px;
+  background: var(--border);
+}
+
+.timeline-item {
+  position: relative;
+  padding-bottom: 24px;
+}
+.timeline-item:last-child {
+  padding-bottom: 0;
+}
+
+.timeline-dot {
+  position: absolute;
+  left: -20px;
+  top: 4px;
+  width: 12px;
+  height: 12px;
+  border-radius: 50%;
+  background: var(--surface);
+  border: 2px solid var(--muted);
+  z-index: 2;
+}
+.dot-auth { border-color: #3b82f6; background: rgba(59, 130, 246, 0.2); }
+.dot-app { border-color: #10b981; background: rgba(16, 185, 129, 0.2); }
+.dot-sec { border-color: #ef4444; background: rgba(239, 68, 68, 0.2); }
+
+.timeline-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.timeline-date {
+  font-size: 0.75rem;
+  color: var(--muted);
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.timeline-event {
+  font-size: 1rem;
+  font-weight: 800;
+  color: var(--text);
+}
+
+.timeline-detail {
+  font-size: 0.85rem;
+  color: var(--subtle, #a1a1aa);
+}
+
+.audit-footer {
+  text-align: center;
+  font-size: 0.7rem;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  opacity: 0.6;
+  border-top: 1px solid var(--border);
+  padding-top: 20px;
+}
+
+/* Animations */
+.fade-in {
+  opacity: 0;
+  animation: fadeUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+.delay-1 { animation-delay: 0.1s; }
+.delay-2 { animation-delay: 0.2s; }
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@media (max-width: 900px) {
+  .profile-grid { grid-template-columns: 1fr; }
+  .header-container { flex-direction: column; align-items: center; text-align: center; top: -70px; }
+  .header-avatar-wrap { margin-right: 0; margin-bottom: 16px; }
+  .header-badges { justify-content: center; }
+  .header-actions { margin-top: 20px; }
+}
 </style>

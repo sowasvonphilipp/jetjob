@@ -52,9 +52,9 @@
         <div v-for="(exp, idx) in cv.experience" :key="idx" class="dynamic-card">
           <button class="delete-btn" @click="removeExperience(idx)"><TrashIcon class="w-4 h-4" /></button>
           <div class="form-grid">
-            <div class="form-group">
+              <div class="form-group">
               <label>Company / Organization</label>
-              <input v-model="exp.company" type="text" class="form-input" placeholder="e.g. Jet2 Virtual">
+              <input v-model="exp.company" type="text" class="form-input" placeholder="e.g. Sunshine Studio">
             </div>
             <div class="form-group">
               <label>Role / Title</label>
@@ -200,12 +200,12 @@ const cv = ref({
   linkedIn: '',
   summary: '',
   experience: [
-    { company: 'Jet2 Virtual', role: 'First Officer', start: 'Mar 2025', end: 'Present', description: '- Operated daily flights across European routes.\n- Maintained perfect safety record.' }
+    { company: 'Sunshine Studio', role: 'Team Member', start: 'Mar 2025', end: 'Present', description: '- Led daily operations across projects.\n- Maintained high quality and reliability.' }
   ],
   education: [
-    { school: 'Roblox Aviation Academy', degree: 'Commercial Pilot License', year: '2024' }
+    { school: 'Example Institute', degree: 'Professional Certificate', year: '2024' }
   ],
-  skills: 'Teamwork, Communication, Flight Simulator X, English'
+  skills: 'Teamwork, Communication, JavaScript, English'
 })
 
 function addExperience() {
@@ -227,7 +227,7 @@ function printCV() {
 }
 
 useSeoMeta({
-  title: 'CV Generator — Jet2 Jobs'
+  title: 'CV Generator — Sunshine Studio'
 })
 </script>
 

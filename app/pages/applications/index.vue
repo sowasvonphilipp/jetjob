@@ -186,8 +186,8 @@ onMounted(() => {
 })
 
 useSeoMeta({
-  title: 'My Applications — Jet2 Jobs',
-  description: 'Track your job applications at Jet2 Roblox Airline.'
+  title: 'My Applications — Sunshine Studio',
+  description: 'Track your job applications at Sunshine Studio.'
 })
 </script>
 

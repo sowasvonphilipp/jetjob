@@ -31,7 +31,7 @@ onMounted(async () => {
   }
 })
 
-useSeoMeta({ title: 'Signing in... — Jet2 Jobs' })
+useSeoMeta({ title: 'Signing in... — Sunshine Studio' })
 </script>
 
 <style scoped>

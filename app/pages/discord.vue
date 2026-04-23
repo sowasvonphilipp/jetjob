@@ -13,14 +13,14 @@
         <div class="logo-outer">
           <img
             src="/logo.png"
-            alt="Jet2 logo"
+            alt="Sunshine Studio logo"
             class="login-logo"
             @error="(e) => (e.target.src = 'https://cdn.discordapp.com/embed/avatars/0.png')"
           >
         </div>
-        <h1 class="login-title">Jet2 Jobs Activity</h1>
+        <h1 class="login-title">Sunshine Studio Activity</h1>
         <p class="login-sub">
-          Welcome to the Jet2 Jobs Discord Activity.<br>
+          Welcome to the Sunshine Studio Discord Activity.<br>
           Please agree to our terms before connecting your account.
         </p>
       </div>
@@ -106,8 +106,8 @@ async function handleLogin() {
 }
 
 useSeoMeta({
-  title: 'Discord Activity — Jet2 Jobs',
-  description: 'Connect your Discord account to Jet2 Jobs through the Discord Activity.'
+  title: 'Discord Activity — Sunshine Studio',
+  description: 'Connect your Discord account to Sunshine Studio through the Discord Activity.'
 })
 </script>
 

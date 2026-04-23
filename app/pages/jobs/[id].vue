@@ -79,15 +79,15 @@
                  <span class="rb-value">{{ job.min_age }}+</span>
                </div>
                <div v-if="job.flight_hours_required" class="req-badge">
-                 <span class="rb-label">Flight Hours</span>
+                 <span class="rb-label">Experience Hours</span>
                  <span class="rb-value">{{ job.flight_hours_required }}h</span>
                </div>
                <div v-if="job.atc_hours_required" class="req-badge">
-                 <span class="rb-label">ATC Hours</span>
+                 <span class="rb-label">Training Hours</span>
                  <span class="rb-value">{{ job.atc_hours_required }}h</span>
                </div>
                <div v-if="job.base_hub" class="req-badge">
-                 <span class="rb-label">Base Hub</span>
+                 <span class="rb-label">Primary Location</span>
                  <span class="rb-value">{{ job.base_hub }}</span>
                </div>
                <div class="req-badge">
@@ -95,7 +95,7 @@
                  <span class="rb-value">{{ job.discord_required ? 'Req' : 'No' }}</span>
                </div>
                <div class="req-badge">
-                 <span class="rb-label">VATSIM</span>
+                 <span class="rb-label">External Network</span>
                  <span class="rb-value">{{ job.flying_vatsim_required ? 'Req' : 'No' }}</span>
                </div>
             </div>
@@ -608,7 +608,7 @@ onMounted(async () => {
 })
 
 useSeoMeta({
-  title: computed(() => job.value ? `${job.value.title} — Jet2 Jobs` : 'Job Details — Jet2 Jobs'),
+  title: computed(() => job.value ? `${job.value.title} — Sunshine Studio` : 'Job Details — Sunshine Studio'),
   description: computed(() => job.value?.short_description || 'View job details and apply.')
 })
 </script>

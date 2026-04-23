@@ -45,7 +45,7 @@
     <div class="demo-disclaimer">
       <div class="demo-inner">
         <span class="demo-tag">DEMO</span>
-        <span class="demo-text">This is a development preview of Jet2 Jobs. Some data may be reset periodically.</span>
+        <span class="demo-text">This is a development preview of Sunshine Studio. Some data may be reset periodically.</span>
       </div>
     </div>
 
@@ -59,10 +59,10 @@
       >
         <img
           src="/logo.png"
-          alt="Jet2 logo"
+          alt="Sunshine Studio logo"
           class="logo"
         >
-        <span class="brand-name">Jet2 Jobs</span>
+        <span class="brand-name">Sunshine Studio</span>
       </NuxtLink>
 
       <!-- Desktop Nav -->
@@ -362,6 +362,7 @@ function toggleTheme() {
 
 // ── Nav ─────────────────────────────────────────────────────────────────────
 const navLinks = [
+  { to: '/profile', label: 'Profile', icon: UserIcon },
   { to: '/', label: 'Home', icon: HomeIcon },
   { to: '/jobs', label: 'Job Listings', icon: BriefcaseIcon },
   {
@@ -369,7 +370,6 @@ const navLinks = [
     label: 'My Applications',
     icon: ClipboardDocumentListIcon
   },
-  { to: '/profile', label: 'Profile', icon: UserIcon },
   { to: '/settings', label: 'Settings', icon: Cog8ToothIcon }
 ]
 
@@ -454,9 +454,9 @@ onBeforeUnmount(() => {
   --muted: rgba(255, 255, 255, 0.52);
   --hover: rgba(255, 255, 255, 0.9);
   --active: #fff;
-  --red: #e8372a;
-  --red-hover: #ff4438;
-  --red-glow: rgba(232, 55, 42, 0.3);
+  --red: #3b82f6;
+  --red-hover: #2563eb;
+  --red-glow: rgba(59, 130, 246, 0.25);
 }
 .app-header.dark {
   --bg: #0f1117;
@@ -495,7 +495,7 @@ onBeforeUnmount(() => {
   margin: 0 auto;
 }
 .demo-tag {
-  background: #ef4444;
+  background: #2563eb;
   color: #fff;
   font-size: 0.65rem;
   font-weight: 800;

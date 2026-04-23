@@ -145,6 +145,16 @@
               />
               Blacklist
             </button>
+            <button
+              :class="['tab', { active: activeTab === 'advanced' }]"
+              @click="activeTab = 'advanced'"
+            >
+              <Cog6ToothIcon
+                class="tab-icon"
+                aria-hidden="true"
+              />
+              Advanced
+            </button>
           </div>
 
           <!-- ═══ JOBS TAB ═══ -->
@@ -155,7 +165,7 @@
                   Open Jobs
                 </h2>
                 <p class="section-sub">
-                  Manage active job postings for Jet2.
+                  Manage active job postings for Sunshine Studio.
                 </p>
               </div>
               <div
@@ -1283,6 +1293,44 @@
               </table>
             </div>
           </div>
+
+          <!-- ═══ ADVANCED TAB ═══ -->
+          <div v-if="activeTab === 'advanced'" class="tab-content">
+            <div class="header-with-actions">
+              <div>
+                <h2 class="section-title">Advanced Tools</h2>
+                <p class="section-sub">Power-user tools: export data and manage templates.</p>
+              </div>
+              <div class="toolbar">
+                <div style="display:flex; gap:10px; align-items:center;">
+                  <select v-model="createTemplateJobId" class="form-input" style="min-width:220px;">
+                    <option disabled value="">Select job to create template</option>
+                    <option v-for="j in allJobs" :key="j.id" :value="j.id">{{ j.title }}</option>
+                  </select>
+                  <button class="btn btn-outline btn-sm" @click="createTemplateFromJob(createTemplateJobId)" :disabled="!createTemplateJobId"><PlusIcon class="btn-icon" /> Create Template</button>
+                  <button class="btn btn-primary btn-sm" @click="exportJobsCSV"><ArrowDownTrayIcon class="btn-icon" /> Export Jobs CSV</button>
+                </div>
+              </div>
+            </div>
+
+            <div style="margin-top:20px;">
+              <h3 class="section-title" style="font-size:1rem; margin-bottom:8px;">Job Templates</h3>
+              <div v-if="jobTemplates.length === 0" class="empty-state" style="padding:20px;">No templates yet. Create one from an existing job.</div>
+              <div v-else style="display:flex; flex-direction:column; gap:10px;">
+                <div v-for="(t, idx) in jobTemplates" :key="t.id" style="display:flex; align-items:center; justify-content:space-between; padding:12px; border:1px solid var(--border); border-radius:8px; background:var(--bg-alt);">
+                  <div>
+                    <div style="font-weight:800;">{{ t.name }}</div>
+                    <div style="font-size:0.85rem; color:var(--muted);">{{ t.created_at }}</div>
+                  </div>
+                  <div style="display:flex; gap:8px;">
+                    <button class="btn btn-outline btn-sm" @click="applyTemplate(t)">Apply</button>
+                    <button class="btn btn-danger btn-sm" @click="deleteTemplate(idx)">Delete</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
         </template>
       </ClientOnly>
     </div>
@@ -1293,6 +1341,7 @@
 <script setup>
 definePageMeta({ layout: 'admin' })
 import { ref, computed, onMounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
 import {
   BriefcaseIcon,
   ClipboardDocumentListIcon,
@@ -1311,10 +1360,13 @@ import {
   BellAlertIcon,
   UsersIcon,
   UserGroupIcon,
-  InformationCircleIcon
+  InformationCircleIcon,
+  Cog6ToothIcon,
+  ArrowDownTrayIcon
 } from '@heroicons/vue/24/outline'
 
 const supabase = useSupabase()
+const router = useRouter()
 const { isAdmin, user, loading, fetchProfile, permissions } = useAuth()
 const refreshing = ref(false)
 const maskAsStaff = ref(true)
@@ -1322,6 +1374,71 @@ const maskAsStaff = ref(true)
 const activeTab = ref('jobs')
 const allJobs = ref([])
 const loadingJobs = ref(true)
+
+// Advanced tools: local templates + CSV export
+const jobTemplates = ref([])
+const createTemplateJobId = ref('')
+
+function loadTemplates() {
+  try {
+    const raw = localStorage.getItem('adminJobTemplates')
+    jobTemplates.value = raw ? JSON.parse(raw) : []
+  } catch (e) {
+    jobTemplates.value = []
+  }
+}
+
+function saveTemplates() {
+  try { localStorage.setItem('adminJobTemplates', JSON.stringify(jobTemplates.value)) } catch (e) { /* ignore */ }
+}
+
+function createTemplateFromJob(jobId) {
+  if (!jobId) return
+  const job = allJobs.value.find(j => j.id === jobId)
+  if (!job) { alert('Job not found'); return }
+  jobTemplates.value.push({ id: Date.now(), name: `${job.title} template`, data: { ...job }, created_at: new Date().toLocaleString() })
+  createTemplateJobId.value = ''
+  saveTemplates()
+  showSaved()
+}
+
+function applyTemplate(t) {
+  if (!t) return
+  try { sessionStorage.setItem('jobTemplate', JSON.stringify(t.data)) } catch (e) {}
+  router.push('/admin/jobs/create')
+}
+
+function deleteTemplate(idx) {
+  if (!confirm('Delete template?')) return
+  jobTemplates.value.splice(idx, 1)
+  saveTemplates()
+  showSaved()
+}
+
+function exportJobsCSV() {
+  const fields = ['id','title','department','experience_level','location','salary','is_active','created_at']
+  const rows = [fields.join(',')]
+  allJobs.value.forEach(job => {
+    const row = fields.map(f => {
+      let v = job[f]
+      if (v === null || v === undefined) return ''
+      if (Array.isArray(v)) v = v.join('; ')
+      v = String(v).replace(/"/g, '""')
+      if (v.includes(',') || v.includes('"') || v.includes('\n')) v = `"${v}"`
+      return v
+    }).join(',')
+    rows.push(row)
+  })
+  const blob = new Blob([rows.join('\n')], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = `jobs-export-${new Date().toISOString().slice(0,10)}.csv`
+  document.body.appendChild(a)
+  a.click()
+  a.remove()
+  URL.revokeObjectURL(url)
+}
 
 
 const allApplications = ref([])
@@ -1880,6 +1997,7 @@ watch(activeTab, loadTab)
 onMounted(async () => {
   if (isAdmin.value) {
     loadTab(activeTab.value)
+    loadTemplates()
   }
 })
 
@@ -1887,10 +2005,11 @@ onMounted(async () => {
 watch(isAdmin, async (val) => {
   if (val) {
     loadTab(activeTab.value)
+    loadTemplates()
   }
 })
 
-useSeoMeta({ title: 'Admin Panel — Jet2 Jobs' })
+useSeoMeta({ title: 'Admin Panel — Sunshine Studio' })
 </script>
 
 <style scoped>

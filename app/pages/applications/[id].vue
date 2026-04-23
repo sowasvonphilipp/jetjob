@@ -122,7 +122,7 @@
           class="result-card result-accepted"
         >
           <h3 class="result-title">
-            <CheckCircleIcon class="result-icon" /> Welcome to Jet2!
+              <CheckCircleIcon class="result-icon" /> Welcome to Sunshine Studio!
           </h3>
           <p class="result-text">
             Congratulations, your application has been <strong>Accepted</strong>. We are thrilled to have you join the team.
@@ -141,7 +141,7 @@
           <div class="result-steps">
             <h4>Next Steps</h4>
             <ul>
-              <li>Join the Jet2 Staff Communications Server.</li>
+                <li>Join the Sunshine Studio Staff Communications Server.</li>
               <li>Wait for your department Head to assign you a training role.</li>
               <li>Review the staff handbook available in the server.</li>
             </ul>
@@ -155,8 +155,8 @@
           <h3 class="result-title">
             <XCircleIcon class="result-icon" /> Application Update
           </h3>
-          <p class="result-text">
-            Thank you for your interest in Jet2. Unfortunately, your application has been <strong>Rejected</strong> at this time.
+            <p class="result-text">
+              Thank you for your interest in Sunshine Studio. Unfortunately, your application has been <strong>Rejected</strong> at this time.
           </p>
           <p class="result-text">
             Due to the high volume of applicants and strict requirements, we could not proceed with your application. We encourage you to improve your skills and apply again during the next hiring wave.

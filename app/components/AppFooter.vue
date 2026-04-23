@@ -5,12 +5,12 @@
       <div class="footer-brand">
         <img
           src="/logo.png"
-          alt="Jet2 logo"
+          alt="Sunshine Studio logo"
           class="footer-logo"
         >
         <div>
-          <span class="footer-name">Jet2 Jobs</span>
-          <span class="footer-tagline">Roblox Airline · Application Portal</span>
+          <span class="footer-name">Sunshine Studio</span>
+          <span class="footer-tagline">Sunshine Studio · Service Portal</span>
         </div>
       </div>
 
@@ -48,16 +48,16 @@
             class="footer-link"
           >Terms of Service</NuxtLink>
           <NuxtLink
-            to="/datenschutz"
+            to="/privacy"
             class="footer-link"
-          >Datenschutz</NuxtLink>
+          >Privacy Policy</NuxtLink>
         </div>
       </nav>
     </div>
-
+ 
     <!-- Bottom bar -->
     <div class="footer-bottom">
-      <span>© {{ year }} Jet2 Roblox Airline — not affiliated with the real Jet2.</span>
+    <span>© {{ year }} Sunshine Studio — not affiliated with Discord Inc.</span>
       <div class="footer-status">
         <span
           class="status-dot"

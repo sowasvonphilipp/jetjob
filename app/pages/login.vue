@@ -13,12 +13,12 @@
         <div class="logo-outer">
           <img
             src="/logo.png"
-            alt="Jet2 logo"
+            alt="Sunshine Studio logo"
             class="login-logo"
             @error="(e) => (e.target.src = 'https://cdn.discordapp.com/embed/avatars/0.png')"
           >
         </div>
-        <h1 class="login-title">Jet2 Jobs</h1>
+        <h1 class="login-title">Sunshine Studio</h1>
         <p class="login-sub">
           Sign in to view listings, apply for roles, and track your applications.
         </p>
@@ -85,8 +85,8 @@ async function handleLogin() {
 }
 
 useSeoMeta({
-  title: 'Sign In — Jet2 Jobs',
-  description: 'Sign in with Discord to access the Jet2 Roblox airline job portal.'
+  title: 'Sign In — Sunshine Studio',
+  description: 'Sign in with Discord to access the Sunshine Studio portal.'
 })
 </script>
 

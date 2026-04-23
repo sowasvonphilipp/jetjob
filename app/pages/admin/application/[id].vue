@@ -328,7 +328,7 @@
                   <span class="info-val"><code class="discord-id-code">{{ app.profiles.discord_id || 'Unknown' }}</code></span>
                 </div>
                 <div class="info-row">
-                  <span class="info-label">Joined Jet2 Platform</span>
+                  <span class="info-label">Joined Sunshine Studio Platform</span>
                   <span class="info-val">{{ app.profiles.created_at ? formatDate(app.profiles.created_at) : 'Unknown' }}</span>
                 </div>
                 <div

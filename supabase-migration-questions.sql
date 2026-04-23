@@ -74,7 +74,7 @@ BEGIN
     (cabin_crew_id, 'How old are you?', 'number', NULL, true, 2),
     (cabin_crew_id, 'What timezone are you in?', 'select', '["UTC-8 (PST)", "UTC-5 (EST)", "UTC+0 (GMT)", "UTC+1 (CET)", "UTC+2 (EET)", "UTC+8 (SGT)", "UTC+10 (AEST)", "Other"]', true, 3),
     (cabin_crew_id, 'Why do you want to join Jet2 as cabin crew?', 'textarea', NULL, true, 4),
-    (cabin_crew_id, 'Do you have any previous experience in Roblox airlines?', 'select', '["No experience", "Less than 3 months", "3-6 months", "6-12 months", "1+ year"]', true, 5),
+    (cabin_crew_id, 'Do you have any previous experience in Roblox yes?', 'select', '["No experience", "Less than 3 months", "3-6 months", "6-12 months", "1+ year"]', true, 5),
     (cabin_crew_id, 'Are you available for at least 2 training sessions per week?', 'checkbox', NULL, true, 6),
     (cabin_crew_id, 'Tell us anything else you would like us to know (optional)', 'textarea', NULL, false, 7);
   END IF;

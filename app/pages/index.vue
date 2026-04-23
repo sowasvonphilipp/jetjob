@@ -4,13 +4,13 @@
     <section class="hero">
       <div class="container">
         <p class="hero-eyebrow">
-          Jet2 Roblox Airline
+          Sunshine Studio
         </p>
         <h1 class="hero-title">
-          Find your role<br><span class="red">in the crew.</span>
+          Find your role<br><span class="red">in our team</span>
         </h1>
         <p class="hero-sub">
-          Lets start your career at Jet2 today!
+          Start your careers with Sunshine Studio today!
         </p>
         <div class="hero-actions">
           <NuxtLink
@@ -308,24 +308,24 @@ const perks = [
   {
     icon: StarIcon,
     title: 'Active community',
-    desc: 'Join a growing group of aviation fans who take Roblox flying seriously.'
+    desc: 'Join a growing community of creators and enthusiasts.'
   },
   {
     icon: ChatBubbleLeftRightIcon,
     title: 'Friendly team',
-    desc: 'No drama, no strict hierarchy — just people who love the sim.'
+    desc: 'No drama, collaborative team — people who enjoy building together.'
   },
   {
     icon: HeartIcon,
     title: 'Regular events',
-    desc: 'Group flights, training sessions and fun livery votes every week.'
+    desc: 'Group sessions, training and community events every week.'
   }
 ]
 
 useSeoMeta({
-  title: 'Jet2 Roblox — Join the Crew',
-  description:
-    'Apply to join the Jet2 Roblox airline crew. View open roles for cabin crew, pilots and ground staff.'
+    title: 'Sunshine Studio — Join the Team',
+    description:
+      'Apply to join Sunshine Studio. View open roles for staff and service positions.'
 })
 </script>
 

@@ -27,10 +27,10 @@
             <!-- Prerequisites -->
             <div class="form-group"><label>Min Age</label><input v-model="jobForm.min_age" type="number" class="form-input"></div>
             <div class="form-group"><label>Max Age</label><input v-model="jobForm.max_age" type="number" class="form-input"></div>
-            <div class="form-group"><label>Flight Hours Req.</label><input v-model="jobForm.flight_hours_required" type="number" class="form-input"></div>
-            <div class="form-group"><label>ATC Hours Req.</label><input v-model="jobForm.atc_hours_required" type="number" class="form-input"></div>
-            <div class="form-group"><label>Base Hub</label><input v-model="jobForm.base_hub" class="form-input"></div>
-            <div class="form-group"><label>Sim Platform</label><input v-model="jobForm.sim_platform_preference" class="form-input"></div>
+            <div class="form-group"><label>Experience Hours</label><input v-model="jobForm.flight_hours_required" type="number" class="form-input"></div>
+            <div class="form-group"><label>Training Hours</label><input v-model="jobForm.atc_hours_required" type="number" class="form-input"></div>
+            <div class="form-group"><label>Primary Location</label><input v-model="jobForm.base_hub" class="form-input"></div>
+            <div class="form-group"><label>Preferred Platform/Tool</label><input v-model="jobForm.sim_platform_preference" class="form-input"></div>
 
             <hr style="margin:10px 0; border:none; border-top:1px solid #eee;" class="col-span-2" />
 

@@ -7,7 +7,7 @@
             Job Listings
           </h1>
           <p class="page-sub">
-            Browse all open positions and apply to join the crew.
+            Browse all open positions and apply to join the team.
           </p>
         </div>
         <ClientOnly>
@@ -225,8 +225,8 @@ async function fetchJobs() {
 onMounted(fetchJobs)
 
 useSeoMeta({
-  title: 'Job Listings — Jet2 Jobs',
-  description: 'Browse and apply for open positions at Jet2 Roblox Airline.'
+  title: 'Job Listings — Sunshine Studio',
+  description: 'Browse and apply for open positions at Sunshine Studio.'
 })
 </script>
 

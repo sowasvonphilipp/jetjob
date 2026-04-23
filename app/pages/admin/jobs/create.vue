@@ -6,7 +6,7 @@
           <ArrowLeftIcon class="w-4 h-4" /> Exit
         </NuxtLink>
         <h1>Create Position</h1>
-        <p>Set up a new role at Jet2</p>
+        <p>Set up a new role at Sunshine Studio</p>
       </div>
 
       <div class="steps-nav">
@@ -34,6 +34,12 @@
     </div>
 
     <div class="wizard-main">
+      <div class="creation-progress">
+        <div class="progress-track">
+          <div class="progress-fill" :style="{ width: progress + '%' }"></div>
+        </div>
+        <div class="progress-text">{{ progress }}% complete</div>
+      </div>
       <div class="wizard-content">
         <Transition name="fade-slide" mode="out-in">
           
@@ -51,7 +57,20 @@
                   <option value="Senior">Senior</option><option value="Management">Management</option>
                 </select>
               </div>
-              <div class="form-group"><label>Base Hub</label><input v-model="form.base_hub" class="form-input"></div>
+              <div class="form-group"><label>Primary Location</label><input v-model="form.base_hub" class="form-input"></div>
+            </div>
+            <div class="grid-2">
+              <div class="form-group">
+                <label>Role Type</label>
+                <select v-model="form.role_type" class="form-input">
+                  <option value="general">General</option>
+                  <option value="organization">Organization</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Template</label>
+                <div class="setting-desc">Apply template from Admin → Advanced to prefill fields.</div>
+              </div>
             </div>
             <div class="form-group"><label>Short Description (Card Summary)</label><textarea v-model="form.short_description" class="form-input" rows="2"></textarea></div>
             <div class="form-group"><label>Full Description (Markdown)</label><textarea v-model="form.long_description" class="form-input text-mono" rows="4"></textarea></div>
@@ -63,16 +82,16 @@
             <div class="grid-2">
                <div class="form-group"><label>Min Age</label><input v-model="form.min_age" type="number" class="form-input"></div>
                <div class="form-group"><label>Max Age</label><input v-model="form.max_age" type="number" class="form-input"></div>
-               <div class="form-group"><label>Req Flight Hours</label><input v-model="form.flight_hours_required" type="number" class="form-input"></div>
-               <div class="form-group"><label>Req ATC Hours</label><input v-model="form.atc_hours_required" type="number" class="form-input"></div>
+               <div class="form-group"><label>Experience Hours</label><input v-model="form.flight_hours_required" type="number" class="form-input"></div>
+               <div class="form-group"><label>Training Hours</label><input v-model="form.atc_hours_required" type="number" class="form-input"></div>
                <div class="form-group"><label>Language</label><input v-model="form.language_requirements" class="form-input"></div>
-               <div class="form-group"><label>Simulator Platform</label><input v-model="form.sim_platform_preference" class="form-input"></div>
+               <div class="form-group"><label>Preferred Tools/Platforms</label><input v-model="form.sim_platform_preference" class="form-input"></div>
             </div>
             <div class="hardware-toggles">
               <label class="toggle-box"><input type="checkbox" v-model="form.discord_required"> Discord Account</label>
               <label class="toggle-box"><input type="checkbox" v-model="form.microphone_required"> Working Microphone</label>
-              <label class="toggle-box"><input type="checkbox" v-model="form.flying_vatsim_required"> VATSIM Experience</label>
-              <label class="toggle-box"><input type="checkbox" v-model="form.livery_installation_required"> Livery Installation</label>
+              <label class="toggle-box"><input type="checkbox" v-model="form.flying_vatsim_required"> External Network Experience</label>
+              <label class="toggle-box"><input type="checkbox" v-model="form.livery_installation_required"> Asset Installation</label>
             </div>
           </div>
 
@@ -80,11 +99,11 @@
           <div v-else-if="step === 3" :key="3" class="stage-container">
             <h2>Role Scope & Training</h2>
             <div class="grid-2">
-               <div class="form-group"><label>Aircraft Types</label><input v-model="form.aircraft_types" class="form-input"></div>
+               <div class="form-group"><label>Required Skills</label><input v-model="form.aircraft_types" class="form-input"></div>
                <div class="form-group"><label>Direct Supervisor</label><input v-model="form.supervisor_name" class="form-input"></div>
                <div class="form-group"><label>Probation Period</label><input v-model="form.probation_period" class="form-input"></div>
-               <div class="form-group"><label>Weekly Flight Req (Hrs)</label><input v-model="form.weekly_flight_requirement" type="number" class="form-input"></div>
-               <div class="form-group"><label>Minimum Rank Req.</label><input v-model="form.minimum_rank_required" class="form-input"></div>
+               <div class="form-group"><label>Weekly Commitment (Hrs)</label><input v-model="form.weekly_flight_requirement" type="number" class="form-input"></div>
+               <div class="form-group"><label>Minimum Rank/Level</label><input v-model="form.minimum_rank_required" class="form-input"></div>
                <div class="form-group"><label>Training Duration</label><input v-model="form.training_duration" class="form-input"></div>
             </div>
             <div class="hardware-toggles">
@@ -142,9 +161,9 @@
         <div v-if="errorMsg" class="error-banner">{{ errorMsg }}</div>
         <div class="action-buttons">
           <button class="btn btn-outline" :disabled="step === 1 || submitting" @click="step--">Go Back</button>
-           <button v-if="step < 5" class="btn btn-primary btn-large" @click="nextStep">Continue <ArrowRightIcon class="w-5 h-5" /></button>
+          <button v-if="step < 5" class="btn btn-primary btn-large" @click="nextStep">Next <ArrowRightIcon class="w-5 h-5" /></button>
           <button v-if="step === 5" class="btn btn-primary btn-large" :disabled="submitting" @click="submitPipeline">
-            <span v-if="submitting">Processing...</span><template v-else>Deploy Position <CheckIcon class="w-5 h-5" /></template>
+            <span v-if="submitting">Publishing...</span><template v-else>Publish Position <CheckIcon class="w-5 h-5" /></template>
           </button>
         </div>
       </div>
@@ -153,7 +172,7 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { ArrowLeftIcon, ArrowRightIcon, PlusIcon, TrashIcon, CheckIcon } from '@heroicons/vue/24/outline'
 
 definePageMeta({ layout: 'admin' })
@@ -162,23 +181,40 @@ const supabase = useSupabase()
 const step = ref(1)
 const submitting = ref(false)
 const errorMsg = ref('')
+const TOTAL_STEPS = 5
+const progress = computed(() => Math.round(((step.value - 1) / (TOTAL_STEPS - 1)) * 100))
 
 const form = ref({
   title: '', department: '', short_description: '', long_description: '', requirements: '', image_url: '',
   salary: 'Volunteer', location: 'In-game (Roblox)', closing_at: null, start_date: '', applicant_limit: null,
   min_age: null, max_age: null, experience_level: 'Entry Level', flight_hours_required: 0, atc_hours_required: 0,
+  role_type: 'general',
   discord_required: true, microphone_required: false, timezone_preference: '', language_requirements: '',
   aircraft_types: '', base_hub: '', benefits: '', application_difficulty: 'Medium', interview_required: false,
   probation_period: '', supervisor_name: '', contact_email: '', is_featured: false, hide_applicant_count: false,
   flying_vatsim_required: false, livery_installation_required: false, sim_platform_preference: 'Any',
   weekly_flight_requirement: 0, minimum_rank_required: '', training_duration: '',
   application_review_time: '2-3 Days', referral_required: false, auto_reject_if_not_met: false,
-  custom_success_message: 'Your application has been received. Our flight operations team will review it shortly.',
+  custom_success_message: 'Your application has been received. Our team will review it shortly.',
   is_active: true
 })
 
-const questions = ref([{ temp_id: 1, question: 'Why Jet2?', type: 'textarea', options: '', required: true, sort_order: 0 }])
+const questions = ref([{ temp_id: 1, question: 'Why Sunshine Studio?', type: 'textarea', options: '', required: true, sort_order: 0 }])
 let qCount = 1
+
+onMounted(() => {
+  const t = sessionStorage.getItem('jobTemplate')
+  if (t) {
+    try {
+      const data = JSON.parse(t)
+      // Merge template data into the form, prefer template values
+      Object.assign(form.value, data)
+      sessionStorage.removeItem('jobTemplate')
+    } catch (e) {
+      console.error('Failed to apply job template', e)
+    }
+  }
+})
 
 function nextStep() {
   errorMsg.value = ''
@@ -276,4 +312,9 @@ async function submitPipeline() {
 .fade-slide-enter-active, .fade-slide-leave-active { transition: all 0.2s; }
 .fade-slide-enter-from { opacity: 0; transform: translateX(15px); }
 .fade-slide-leave-to { opacity: 0; transform: translateX(-15px); }
+
+.creation-progress { max-width: 800px; margin: 18px auto 0; width: 100%; padding: 0 40px; display: flex; align-items: center; gap: 12px; }
+.progress-track { flex: 1; height: 10px; background: rgba(148,163,184,0.08); border-radius: 8px; overflow: hidden; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--red), #2563eb); width: 0; transition: width 250ms ease; }
+.progress-text { width: 84px; text-align: right; color: var(--muted); font-weight: 800; font-size: 0.875rem; }
 </style>

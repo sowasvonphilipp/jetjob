@@ -2,17 +2,17 @@
   <main class="static-page">
     <div class="container">
       <h1 class="page-title">General Information</h1>
-      <p class="page-sub">About Jet2 Virtual and our operations.</p>
+      <p class="page-sub">About Sunshine Studio and our operations.</p>
       
       <div class="content-block">
         <h2>Who We Are</h2>
-        <p>Jet2 Virtual is a premier virtual airline operating primarily on Roblox. We simulate real-world airline operations with a focus on professionalism, community engagement, and high-quality roleplay, delivering the ultimate aviation experience on the platform.</p>
+        <p>Sunshine Studio is a community-focused organization operating primarily on Roblox and Discord. We provide service and community tools with a focus on professionalism, engagement, and high-quality interactions across platforms.</p>
         
         <h2>Our Fleet & Operations</h2>
         <p>We operate a strictly maintained fleet, flying popular medium-haul and short-haul routes across Europe. Our pilots are trained to uphold the highest standards of safety, communication, and operational realism, whether operating a 737 or an A320.</p>
         
         <h2>The Community</h2>
-        <p>Joining Jet2 Virtual means joining a family of aviation enthusiasts. Whether you're a seasoned virtual pilot, an aspiring flight attendant, or looking to coordinate events from the control tower, you'll find a welcoming environment with dedicated staff ready to help you grow your skills.</p>
+        <p>Joining Sunshine Studio means joining a family of enthusiasts. Whether you're skilled in operations, community events, or creative roles, you'll find a welcoming environment with dedicated staff ready to help you grow your skills.</p>
         
         <h2>Contact & Support</h2>
         <p>If you have any questions regarding your application, a moderation action, or general inquiries, please open a ticket in our official Discord server. Our Human Resources and Moderation teams are active daily and will be happy to assist you.</p>
@@ -23,8 +23,8 @@
 
 <script setup>
 useSeoMeta({
-  title: 'Information — Jet2 Jobs',
-  description: 'General information about Jet2 Virtual operations and community.'
+  title: 'Information — Sunshine Studio',
+  description: 'General information about Sunshine Studio operations and community.'
 })
 </script>
 

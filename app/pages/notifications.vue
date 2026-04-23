@@ -147,7 +147,7 @@ onMounted(() => {
   if (isLoggedIn.value) fetchNotifications()
 })
 
-useSeoMeta({ title: 'Notifications — Jet2 Jobs' })
+useSeoMeta({ title: 'Notifications — Sunshine Studio' })
 </script>
 
 <style scoped>

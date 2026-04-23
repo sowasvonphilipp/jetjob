@@ -57,12 +57,7 @@
             >
               <AdjustmentsHorizontalIcon class="nav-icon" /> Preferences
             </button>
-            <button
-              :class="['nav-item', { active: activeTab === 'developer' }]"
-              @click="activeTab = 'developer'"
-            >
-              <CodeBracketIcon class="nav-icon" /> Developer
-            </button>
+            
             <button
               :class="['nav-item', { active: activeTab === 'account' }]"
               @click="activeTab = 'account'"
@@ -608,7 +603,7 @@
               </div>
               <button
                 class="btn btn-outline"
-                @click="mockAction('Data Export Scheduled')"
+                @click="mockAction('Please contact support.')"
               >
                 Request JSON Archive
               </button>
@@ -782,119 +777,6 @@
             </div>
           </div>
 
-          <!-- ================= DEVELOPER ================= -->
-          <div
-            v-show="activeTab === 'developer'"
-            class="tab-pane"
-          >
-            <div class="setting-group-title">
-              Developer Mode
-            </div>
-            <div class="setting-card">
-              <div class="setting-row">
-                <div class="setting-info">
-                  <div><span class="setting-name text-red">Enable Developer Mode</span><span class="setting-desc">Turn on advanced API and networking tools. Do not use unless you know what you are doing.</span></div>
-                </div>
-                <button
-                  :class="['toggle-switch', { active: opts.devMode }]"
-                  style="border:1px solid #ef4444"
-                  @click="opts.devMode = !opts.devMode"
-                >
-                  <span class="toggle-knob" />
-                </button>
-              </div>
-            </div>
-
-            <div
-              v-if="opts.devMode"
-              style="animation: fade 0.3s ease;"
-            >
-              <div class="setting-group-title">
-                API Keys & Tokens
-              </div>
-              <div class="setting-card">
-                <div class="setting-form-group">
-                  <label>Personal Access Token (PAT)</label>
-                  <div style="display:flex;gap:10px;">
-                    <input
-                      type="password"
-                      class="form-input"
-                      disabled
-                      value="sk-live-asdf897as9df7a9sdf"
-                      style="flex:1;"
-                    >
-                    <button
-                      class="btn btn-outline"
-                      @click="mockAction('Token Copied')"
-                    >
-                      Copy
-                    </button>
-                    <button
-                      class="btn btn-outline text-red"
-                      @click="mockAction('Token Revoked')"
-                    >
-                      Revoke
-                    </button>
-                  </div>
-                  <p
-                    class="setting-desc"
-                    style="margin-top:4px;"
-                  >
-                    Used for programmatic access to the Jet2 Jobs GraphQL API.
-                  </p>
-                </div>
-              </div>
-
-              <div class="setting-group-title">
-                Client Overrides
-              </div>
-              <div class="setting-card">
-                <div
-                  v-for="(val, key) in devOverrides"
-                  :key="key"
-                  class="setting-row"
-                >
-                  <div class="setting-info">
-                    <div><span class="setting-name">{{ val.name }}</span><span class="setting-desc">{{ val.desc }}</span></div>
-                  </div>
-                  <button
-                    :class="['toggle-switch', { active: opts[key] }]"
-                    @click="opts[key] = !opts[key]"
-                  >
-                    <span class="toggle-knob" />
-                  </button>
-                </div>
-              </div>
-
-              <div class="setting-group-title">
-                Console Logging Level
-              </div>
-              <div class="setting-card">
-                <div class="setting-form-group">
-                  <select
-                    v-model="opts.logLevel"
-                    class="form-input"
-                  >
-                    <option value="none">
-                      None
-                    </option>
-                    <option value="error">
-                      Error Only
-                    </option>
-                    <option value="warn">
-                      Warnings + Errors
-                    </option>
-                    <option value="info">
-                      Info
-                    </option>
-                    <option value="debug">
-                      Debug (Extremely Verbose)
-                    </option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
 
           <!-- ================= ACCOUNT / SECURITY ================= -->
           <div
@@ -1024,12 +906,12 @@ const activeTab = ref('profile')
 const hasChanges = ref(false)
 
 const tabTitle = computed(() => {
-  const titles = { profile: 'Identity Base', appearance: 'Visual Output', notifications: 'Alert Matrix', privacy: 'Security Ops', preferences: 'Core Preferences', developer: 'Developer Overrides', account: 'Danger Zone' }
+  const titles = { profile: 'Identity Base', appearance: 'Visual Output', notifications: 'Alert Matrix', privacy: 'Security Ops', preferences: 'Core Preferences', account: 'Danger Zone' }
   return titles[activeTab.value]
 })
 
 const tabDescription = computed(() => {
-  const desc = { profile: 'Manage your platform identity and social connections.', appearance: 'Tweak CSS and zoom rendering metrics.', notifications: 'Configure dozens of granular notification hooks.', privacy: 'Lock down your session trackers and visibility.', preferences: 'Adjust structural defaults.', developer: 'Access raw API and debugging components.', account: 'Destructive session actions.' }
+  const desc = { profile: 'Manage your platform identity and social connections.', appearance: 'Tweak CSS and zoom rendering metrics.', notifications: 'Configure dozens of granular notification hooks.', privacy: 'Lock down your session trackers and visibility.', preferences: 'Adjust structural defaults.', account: 'Destructive session actions.' }
   return desc[activeTab.value]
 })
 

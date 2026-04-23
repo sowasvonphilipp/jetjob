@@ -14,8 +14,8 @@
   --text:     #0f1f45;
   --muted:    #64748b;
   --subtle:   #94a3b8;
-  --red:      #e8372a;
-  --red-hover:#ff4438;
+  --red:      #3b82f6; /* primary blue */
+  --red-hover:#2563eb; /* darker blue on hover */
   --navy:     #1e3a6e;
   --page-bg:  #ffffff;
 }
