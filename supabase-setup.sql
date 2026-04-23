@@ -19,6 +19,7 @@ CREATE TABLE IF NOT EXISTS jobs (
   image_url TEXT,
   posted_at TIMESTAMPTZ NOT NULL DEFAULT now(),
   closing_at TIMESTAMPTZ,
+  start_date DATE,
   applicant_limit INTEGER,
   applicant_count INTEGER NOT NULL DEFAULT 0,
   requirements INTEGER NOT NULL DEFAULT 0,

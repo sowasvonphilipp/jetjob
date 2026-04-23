@@ -220,6 +220,17 @@ onMounted(() => {
   if (t) {
     try {
       const data = JSON.parse(t)
+      // If the template includes questions, apply them to the questions list
+      if (data.questions && Array.isArray(data.questions)) {
+        questions.value = []
+        data.questions.forEach((q, i) => {
+          qCount++
+          const opts = Array.isArray(q.options) ? q.options.join(',') : (q.options || '')
+          questions.value.push({ temp_id: qCount, question: q.question || q.prompt || '', type: q.type || 'text', options: opts, required: !!q.required, sort_order: i })
+        })
+        // remove questions from data so it doesn't get assigned into form (avoids DB payload issues)
+        delete data.questions
+      }
       // Merge template data into the form, prefer template values
       Object.assign(form.value, data)
       sessionStorage.removeItem('jobTemplate')
@@ -340,11 +351,19 @@ async function submitPipeline() {
     payload.position = payload.title
     delete payload.requirements
     // Remove front-end only fields that may not exist in DB schema
-    try { delete payload.ai_prompt } catch (e) {}
+    try {
+      const nonDbFields = ['ai_prompt','questions','data','temp_id','answers','id','created_at','updated_at']
+      nonDbFields.forEach(k => { if (k in payload) delete payload[k] })
+    } catch (e) {}
     Object.keys(payload).forEach(key => { if (payload[key] === '') payload[key] = null })
 
+    console.log('Publishing job payload', payload)
     const { data: jobRes, error: jobErr } = await supabase.from('jobs').insert(payload).select('id').single()
-    if (jobErr) throw new Error('Job Failed: ' + jobErr.message)
+    console.log('Supabase insert result', { jobRes, jobErr })
+    if (jobErr) {
+      console.error('Job insert error', jobErr)
+      throw new Error('Job Failed: ' + (jobErr.message || JSON.stringify(jobErr)))
+    }
 
     newJobId = jobRes.id
     if (questions.value.length > 0) {
