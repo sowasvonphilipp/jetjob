@@ -73,6 +73,7 @@
                   <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
                     <input ref="jsonImportFile" type="file" accept=".json,application/json" style="display:none" @change="handleImportJson" />
                     <button type="button" class="btn btn-outline btn-sm" @click="triggerImportJson">Import JSON</button>
+                    <button type="button" class="btn btn-outline btn-sm" @click="exportExampleJson">Export Example JSON</button>
                     <button type="button" class="btn btn-outline btn-sm" @click="() => { sessionStorage.removeItem('jobTemplate'); sessionStorage.removeItem('aiTemplate'); alert('Cleared session template'); }">Clear Session Template</button>
                   </div>
               </div>
@@ -212,6 +213,7 @@ const form = ref({
 const questions = ref([{ temp_id: 1, question: 'Why Sunshine Studio?', type: 'textarea', options: '', required: true, sort_order: 0 }])
 let qCount = 1
 const jsonImportFile = ref(null)
+const exampleExported = ref(false)
 
 onMounted(() => {
   const t = sessionStorage.getItem('jobTemplate')
@@ -281,6 +283,54 @@ async function handleImportJson(e) {
   }
 }
 
+function exportExampleJson() {
+  const sample = {
+    title: form.value.title || 'Support Engineer',
+    department: form.value.department || 'Support',
+    short_description: form.value.short_description || 'Provide friendly support to customers and troubleshoot issues.',
+    long_description: form.value.long_description || 'Detailed responsibilities, expectations, and required skills in Markdown.',
+    salary: form.value.salary || 'Paid',
+    location: form.value.location || 'Remote',
+    closing_at: form.value.closing_at || new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString().slice(0,10),
+    experience_level: form.value.experience_level || 'Intermediate',
+    role_type: form.value.role_type || 'general',
+    min_age: form.value.min_age || null,
+    max_age: form.value.max_age || null,
+    discord_required: !!form.value.discord_required,
+    microphone_required: !!form.value.microphone_required,
+    language_requirements: form.value.language_requirements || 'English',
+    sim_platform_preference: form.value.sim_platform_preference || 'Any',
+    base_hub: form.value.base_hub || '',
+    weekly_flight_requirement: form.value.weekly_flight_requirement || 0,
+    application_review_time: form.value.application_review_time || '2-3 Days',
+    custom_success_message: form.value.custom_success_message || 'Your application has been received. Our team will review it shortly.',
+    is_active: form.value.is_active !== undefined ? form.value.is_active : true,
+    ai_prompt: form.value.ai_prompt || 'You are an assistant that writes job postings and screening rules. Output a short posting and a list of screening questions.',
+    questions: (questions.value && questions.value.length > 0) ? questions.value.map(q => ({ question: q.question, type: q.type, options: q.options, required: q.required })) : [{ question: 'Why do you want this role?', type: 'textarea', required: true }]
+  }
+
+  const json = JSON.stringify(sample, null, 2)
+  try {
+    const blob = new Blob([json], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `job-example-${new Date().toISOString().slice(0,10)}.json`
+    document.body.appendChild(a)
+    a.click()
+    a.remove()
+    URL.revokeObjectURL(url)
+  } catch (e) {
+    console.error('Export failed', e)
+  }
+
+  // Try to copy to clipboard as well
+  try { navigator.clipboard && navigator.clipboard.writeText(json) } catch (e) {}
+  exampleExported.value = true
+  setTimeout(() => exampleExported.value = false, 2000)
+  alert('Example JSON downloaded' + (navigator.clipboard ? ' and copied to clipboard' : ''))
+}
+
 async function submitPipeline() {
   errorMsg.value = ''
   submitting.value = true
@@ -289,6 +339,8 @@ async function submitPipeline() {
     const payload = { ...form.value }
     payload.position = payload.title
     delete payload.requirements
+    // Remove front-end only fields that may not exist in DB schema
+    try { delete payload.ai_prompt } catch (e) {}
     Object.keys(payload).forEach(key => { if (payload[key] === '') payload[key] = null })
 
     const { data: jobRes, error: jobErr } = await supabase.from('jobs').insert(payload).select('id').single()
