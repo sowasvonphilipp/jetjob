@@ -69,9 +69,18 @@
               </div>
               <div class="form-group">
                 <label>Template</label>
-                <div class="setting-desc">Apply template from Admin → Advanced to prefill fields.</div>
+                  <div class="setting-desc">Apply template from Admin → Advanced to prefill fields.</div>
+                  <div style="margin-top:8px; display:flex; gap:8px; align-items:center;">
+                    <input ref="jsonImportFile" type="file" accept=".json,application/json" style="display:none" @change="handleImportJson" />
+                    <button type="button" class="btn btn-outline btn-sm" @click="triggerImportJson">Import JSON</button>
+                    <button type="button" class="btn btn-outline btn-sm" @click="() => { sessionStorage.removeItem('jobTemplate'); sessionStorage.removeItem('aiTemplate'); alert('Cleared session template'); }">Clear Session Template</button>
+                  </div>
               </div>
             </div>
+              <div class="form-group">
+                <label>AI Assistant Template (optional)</label>
+                <textarea v-model="form.ai_prompt" class="form-input" rows="3" placeholder="Optional AI prompt to help generate or screen applications..."></textarea>
+              </div>
             <div class="form-group"><label>Short Description (Card Summary)</label><textarea v-model="form.short_description" class="form-input" rows="2"></textarea></div>
             <div class="form-group"><label>Full Description (Markdown)</label><textarea v-model="form.long_description" class="form-input text-mono" rows="4"></textarea></div>
           </div>
@@ -141,7 +150,7 @@
             <div class="form-group"><label>Custom Success Message</label><textarea v-model="form.custom_success_message" class="form-input" rows="2" placeholder="Shown after submission..."></textarea></div>
             <div class="questions-list">
               <div v-for="(q, idx) in questions" :key="q.temp_id" class="q-card">
-                <div class="q-header"><span>Q{{ idx + 1 }}</span><button class="delete-q" @click="removeQ(idx)"><TrashIcon class="w-4 h-4" /></button></div>
+                <div class="q-header"><span>Q{{ idx + 1 }}</span><button class="delete-q" :aria-label="'Remove question ' + (idx + 1)" @click="removeQ(idx)"><TrashIcon class="w-4 h-4" aria-hidden="true"/></button></div>
                 <input v-model="q.question" class="form-input q-title" placeholder="Prompt...">
                 <div class="q-config">
                   <select v-model="q.type" class="form-input w-auth">
@@ -189,6 +198,7 @@ const form = ref({
   salary: 'Volunteer', location: 'In-game (Roblox)', closing_at: null, start_date: '', applicant_limit: null,
   min_age: null, max_age: null, experience_level: 'Entry Level', flight_hours_required: 0, atc_hours_required: 0,
   role_type: 'general',
+  ai_prompt: '',
   discord_required: true, microphone_required: false, timezone_preference: '', language_requirements: '',
   aircraft_types: '', base_hub: '', benefits: '', application_difficulty: 'Medium', interview_required: false,
   probation_period: '', supervisor_name: '', contact_email: '', is_featured: false, hide_applicant_count: false,
@@ -201,6 +211,7 @@ const form = ref({
 
 const questions = ref([{ temp_id: 1, question: 'Why Sunshine Studio?', type: 'textarea', options: '', required: true, sort_order: 0 }])
 let qCount = 1
+const jsonImportFile = ref(null)
 
 onMounted(() => {
   const t = sessionStorage.getItem('jobTemplate')
@@ -213,6 +224,15 @@ onMounted(() => {
     } catch (e) {
       console.error('Failed to apply job template', e)
     }
+  }
+  const a = sessionStorage.getItem('aiTemplate')
+  if (a) {
+    try {
+      form.value.ai_prompt = JSON.parse(a)
+    } catch (e) {
+      form.value.ai_prompt = a
+    }
+    sessionStorage.removeItem('aiTemplate')
   }
 })
 
@@ -231,6 +251,35 @@ function addQ() {
 }
 
 function removeQ(idx) { questions.value.splice(idx, 1) }
+
+function triggerImportJson() { if (jsonImportFile.value) jsonImportFile.value.click() }
+
+async function handleImportJson(e) {
+  const f = (e?.target && e.target.files && e.target.files[0]) || (jsonImportFile.value && jsonImportFile.value.files && jsonImportFile.value.files[0])
+  if (!f) return
+  try {
+    const text = await f.text()
+    const parsed = JSON.parse(text)
+    const data = parsed.data || parsed
+    Object.assign(form.value, data)
+    if (parsed.questions && Array.isArray(parsed.questions)) {
+      questions.value = []
+      parsed.questions.forEach((q, i) => {
+        qCount++
+        const opts = Array.isArray(q.options) ? q.options.join(',') : (q.options || '')
+        questions.value.push({ temp_id: qCount, question: q.question || q.prompt || '', type: q.type || 'text', options: opts, required: !!q.required, sort_order: i })
+      })
+    }
+    if (parsed.ai_prompt || data.ai_prompt) form.value.ai_prompt = parsed.ai_prompt || data.ai_prompt
+    alert('Imported JSON applied to the form')
+  } catch (err) {
+    console.error('Import JSON failed', err)
+    alert('Failed to import JSON: ' + (err?.message || 'Invalid file'))
+  } finally {
+    if (e && e.target) e.target.value = ''
+    if (jsonImportFile.value) jsonImportFile.value.value = ''
+  }
+}
 
 async function submitPipeline() {
   errorMsg.value = ''

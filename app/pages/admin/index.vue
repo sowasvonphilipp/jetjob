@@ -219,6 +219,7 @@
                         <NuxtLink
                           :to="`/admin/jobs/${job.id}`"
                           class="action-btn"
+                          :aria-label="'Edit job ' + job.title"
                           title="Edit"
                         >
                           <PencilIcon
@@ -228,6 +229,7 @@
                         </NuxtLink>
                         <button
                           class="action-btn action-toggle"
+                          :aria-label="'Toggle active ' + job.title"
                           title="Toggle Active"
                           @click="toggleJobActive(job)"
                         >
@@ -244,6 +246,7 @@
                         </button>
                         <button
                           class="action-btn action-delete"
+                          :aria-label="'Delete ' + job.title"
                           title="Delete"
                           @click="deleteJob(job)"
                         >
@@ -395,6 +398,7 @@
                       <NuxtLink
                         :to="`/admin/application/${app.id}`"
                         class="action-btn"
+                        :aria-label="'Open application ' + (app.discord_username || app.id)"
                         title="Full Review"
                       >
                         <DocumentMagnifyingGlassIcon
@@ -481,6 +485,7 @@
                     <td class="td-actions">
                       <button
                         class="action-btn action-toggle"
+                        :aria-label="'Toggle announcement ' + ann.title"
                         title="Toggle Status"
                         @click="toggleAnnouncement(ann)"
                       >
@@ -497,6 +502,7 @@
                       </button>
                       <button
                         class="action-btn action-delete"
+                        :aria-label="'Delete announcement ' + ann.title"
                         title="Delete"
                         @click="deleteAnnouncement(ann.id)"
                       >
@@ -791,6 +797,7 @@
                       <button
                         v-if="permissions?.can_ban_users && acc.discord_username !== 'derkloking' && !acc.is_banned"
                         class="action-btn action-delete"
+                        :aria-label="'Ban ' + acc.discord_username"
                         title="Ban User"
                         @click="banSpecificUser(acc.id, acc.discord_username)"
                       >
@@ -802,6 +809,7 @@
                       <button
                         v-if="permissions?.can_ban_users && acc.is_banned"
                         class="action-btn action-toggle"
+                        :aria-label="'Unban ' + acc.discord_username"
                         title="Unban"
                         @click="unbanSpecificUser(acc.id)"
                       >
@@ -1019,6 +1027,7 @@
                       <button
                         v-if="s.discord_username !== 'derkloking'"
                         class="action-btn action-delete"
+                        :aria-label="'Remove staff ' + (s.discord_username || s.id)"
                         title="Remove Staff"
                         @click="removeStaff(s)"
                       >
@@ -1187,6 +1196,7 @@
                     <td class="td-actions">
                       <button
                         class="action-btn action-toggle"
+                        :aria-label="'Toggle notice ' + notice.title"
                         title="Toggle"
                         @click="toggleNotice(notice)"
                       >
@@ -1203,6 +1213,7 @@
                       </button>
                       <button
                         class="action-btn action-delete"
+                        :aria-label="'Delete notice ' + notice.title"
                         title="Delete"
                         @click="deleteNotice(notice.id)"
                       >
@@ -1279,6 +1290,7 @@
                     <td class="td-actions">
                       <button
                         class="action-btn action-toggle"
+                        :aria-label="'Unban ' + ban.user_id"
                         title="Unban"
                         @click="unbanUser(ban.user_id)"
                       >
@@ -1309,6 +1321,8 @@
                   </select>
                   <button class="btn btn-outline btn-sm" @click="createTemplateFromJob(createTemplateJobId)" :disabled="!createTemplateJobId"><PlusIcon class="btn-icon" /> Create Template</button>
                   <button class="btn btn-primary btn-sm" @click="exportJobsCSV"><ArrowDownTrayIcon class="btn-icon" /> Export Jobs CSV</button>
+                  <input ref="jsonFile" type="file" accept=".json,application/json" style="display:none" @change="handleImportJson" />
+                  <button class="btn btn-outline btn-sm" @click="triggerJsonInput"><DocumentTextIcon class="btn-icon" /> Import JSON</button>
                 </div>
               </div>
             </div>
@@ -1392,11 +1406,47 @@ function saveTemplates() {
   try { localStorage.setItem('adminJobTemplates', JSON.stringify(jobTemplates.value)) } catch (e) { /* ignore */ }
 }
 
+// File import helpers for JSON templates
+const jsonFile = ref(null)
+function triggerJsonInput() {
+  if (jsonFile.value) jsonFile.value.click()
+}
+
+async function handleImportJson(e) {
+  const f = (e?.target && e.target.files && e.target.files[0]) || (jsonFile.value && jsonFile.value.files && jsonFile.value.files[0])
+  if (!f) return
+  try {
+    const text = await f.text()
+    const parsed = JSON.parse(text)
+    const list = []
+    if (Array.isArray(parsed)) list.push(...parsed)
+    else if (parsed.templates && Array.isArray(parsed.templates)) list.push(...parsed.templates)
+    else list.push(parsed)
+
+    list.forEach(obj => {
+      const data = obj.data || obj
+      const name = obj.name || (data && data.title) || `Imported ${new Date().toLocaleString()}`
+      const ai_prompt = obj.ai_prompt || data.ai_prompt || null
+      jobTemplates.value.push({ id: Date.now() + Math.floor(Math.random() * 1000), name, data, ai_prompt, created_at: new Date().toLocaleString() })
+    })
+
+    saveTemplates()
+    showSaved()
+    alert(`Imported ${list.length} template(s).`)
+  } catch (err) {
+    console.error('Import failed', err)
+    alert('Failed to import JSON: ' + (err?.message || 'Invalid JSON'))
+  } finally {
+    if (e && e.target) e.target.value = ''
+    if (jsonFile.value) jsonFile.value.value = ''
+  }
+}
+
 function createTemplateFromJob(jobId) {
   if (!jobId) return
   const job = allJobs.value.find(j => j.id === jobId)
   if (!job) { alert('Job not found'); return }
-  jobTemplates.value.push({ id: Date.now(), name: `${job.title} template`, data: { ...job }, created_at: new Date().toLocaleString() })
+  jobTemplates.value.push({ id: Date.now(), name: `${job.title} template`, data: { ...job }, ai_prompt: job.ai_prompt || null, created_at: new Date().toLocaleString() })
   createTemplateJobId.value = ''
   saveTemplates()
   showSaved()
@@ -1405,6 +1455,11 @@ function createTemplateFromJob(jobId) {
 function applyTemplate(t) {
   if (!t) return
   try { sessionStorage.setItem('jobTemplate', JSON.stringify(t.data)) } catch (e) {}
+  try {
+    if (t.ai_prompt) sessionStorage.setItem('aiTemplate', JSON.stringify(t.ai_prompt))
+    else if (t.data && t.data.ai_prompt) sessionStorage.setItem('aiTemplate', JSON.stringify(t.data.ai_prompt))
+    else sessionStorage.removeItem('aiTemplate')
+  } catch (e) {}
   router.push('/admin/jobs/create')
 }
 
